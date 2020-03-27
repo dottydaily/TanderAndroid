@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Tander</string>
+    <string name="title_promotion">Promotion</string>
+    <string name="title_map">Map</string>
+    <string name="title_nearby">Nearby</string>
+    <string name="title_profile">Profile</string>
+</resources>
