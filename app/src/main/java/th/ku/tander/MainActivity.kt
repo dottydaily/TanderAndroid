@@ -7,6 +7,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import th.ku.tander.helper.RequestManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,5 +24,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_nearby, R.id.navigation_profile))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        RequestManager.start(this)
     }
 }
