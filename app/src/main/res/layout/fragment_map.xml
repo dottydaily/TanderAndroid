@@ -6,6 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".ui.map.MapFragment">
 
+    <EditText
+        android:id="@+id/search_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_search"
+        android:fontFamily="sans-serif"
+        android:hint="@string/searchPromptText"
+        android:inputType="text"
+        android:background="@drawable/searchbar_background"
+        android:layout_margin="6dp"
+        android:padding="2dp"
+        android:singleLine="true"
+        android:textSize="14sp"
+        android:focusable="false"
+        android:focusedByDefault="false"
+        app:layout_constraintBottom_toTopOf="@+id/mapFragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"/>
+
     <ProgressBar
         android:id="@+id/loadingSpinner"
         style="?android:attr/progressBarStyleLarge"
@@ -20,7 +41,11 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
