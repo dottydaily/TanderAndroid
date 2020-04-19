@@ -3,6 +3,8 @@ package th.ku.tander.helper
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.google.android.gms.maps.model.LatLng
+import org.json.JSONArray
+import org.json.JSONObject
 import th.ku.tander.model.Restaurant
 import java.io.StringReader
 
@@ -25,12 +27,13 @@ object JSONParser {
     }
 
     fun fromJSONArraytoRestaurantArray(jsonString: String): ArrayList<Restaurant> {
-        val jsonArray = klaxon.parseJsonArray(StringReader(jsonString))
+        val jsonArray = JSONArray(jsonString)
+//        val jsonArray = klaxon.parseJsonArray(StringReader(jsonString))
         val restaurants = ArrayList<Restaurant>()
 
-        for (member in jsonArray) {
-            val jsonObject = member as JsonObject
-            restaurants.add(fromJSONtoRestaurant(jsonObject.toJsonString()))
+        for (i in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray[i] as JSONObject
+            restaurants.add(fromJSONtoRestaurant(jsonObject.toString()))
         }
 
         return restaurants
