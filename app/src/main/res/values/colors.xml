@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorPrimary">#EE5300</color>
+    <color name="colorPrimaryDark">#D14A00</color>
     <color name="colorAccent">#929BCC</color>
     <color name="colorProgressTintBackground">#4A4D5E</color>
     <color name="colorSearchBar">#E8E8E8</color>

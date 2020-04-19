@@ -134,7 +134,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-
         mapFragment.onSaveInstanceState(outState)
     }
 
