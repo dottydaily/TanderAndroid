@@ -23,14 +23,14 @@
         android:textSize="@dimen/searchbar_fontsize"
         android:focusable="false"
         android:focusedByDefault="false"
-        app:layout_constraintBottom_toTopOf="@+id/mapFragment"
+        app:layout_constraintBottom_toTopOf="@+id/map_fragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="invisible"/>
 
     <ProgressBar
-        android:id="@+id/loadingSpinner"
+        android:id="@+id/loading_spinner"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <fragment
-        android:id="@+id/mapFragment"
+        android:id="@+id/map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
