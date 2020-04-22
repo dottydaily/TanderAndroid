@@ -6,6 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".ui.search.SearchActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/search_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/supportActionBarWhite"
+        app:title="Search restaurant"
+        app:titleTextColor="@android:color/white"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <EditText
         android:id="@+id/search_bar_search_page"
         android:layout_width="0dp"
@@ -24,7 +38,7 @@
         android:focusedByDefault="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/search_actionbar"/>
 
     <ProgressBar
         android:id="@+id/loading_spinner_searchpage"
@@ -52,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
-            android:orientation="horizontal" >
+            android:orientation="vertical" >
         </TableLayout>
 
     </ScrollView>

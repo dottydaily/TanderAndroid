@@ -14,6 +14,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <!-- Support Actionbar -->
+    <style name="supportActionBarWhite" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
     <!-- Divider for tablelayout -->
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>

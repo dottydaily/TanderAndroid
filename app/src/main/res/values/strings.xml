@@ -85,4 +85,11 @@ W/th.ku.tander: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/
 W/th.ku.tander: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/Object;J)Ljava/lang/Object; (greylist, linking, allowed)
 I/System.out: Launching Search Activity
 I/System.out: On Pause</string>
+    <string name="popup_category_string">Category</string>
+    <string name="start_price_text">Start Price 0 Baht</string>
+    <string name="popup_category_hint">Select category</string>
+    <string name="cancel_button_text">Cancel</string>
+    <string name="filter_button_text">Filter</string>
+    <string name="category_select_cancel_button_text">Cancel</string>
+    <string name="category_select_button_text">Select</string>
 </resources>

@@ -1,14 +1,18 @@
 package th.ku.tander.ui.search
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.setPadding
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -22,17 +26,65 @@ import java.net.URLEncoder
 
 class SearchActivity : AppCompatActivity() {
 
+    private val FILTER_ACTIVITY_REQUEST_CODE = 0
+    private var keyword: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
         search_bar_search_page.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                requestRestaurantBySearch(search_bar_search_page.text.toString())
+                keyword = search_bar_search_page.text.toString()
+                requestRestaurantBySearch(keyword!!)
                 search_result_table.removeAllViews()
                 true
             }
             false
+        }
+
+        // focus on searchbar and show keyboard by default
+        makeSearchBarFocus()
+
+//        supportActionBar?.title = "Search"
+        setSupportActionBar(findViewById(R.id.search_actionbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.filter_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.filter_button -> {
+            val popupFilter = Intent(this, FilterPopUpWindow::class.java)
+            popupFilter.putExtra("keyword", keyword)
+            startActivityForResult(popupFilter, FILTER_ACTIVITY_REQUEST_CODE)
+            true
+        }
+
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        search_bar_search_page.clearFocus()
+
+        if (requestCode == FILTER_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val keyword = data?.getStringExtra("search")
+
+                if (keyword.isNullOrBlank()) {
+                    Toast.makeText(this, "No search.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Searching: ${keyword}", Toast.LENGTH_SHORT).show()
+                    requestRestaurantBySearch(keyword)
+                }
+            }
         }
     }
 
@@ -41,7 +93,7 @@ class SearchActivity : AppCompatActivity() {
         val encodedKeyword = URLEncoder.encode(keyword, "utf-8")
         // request
         val url = "https://tander-webservice.an.r.appspot.com/restaurants/search/${encodedKeyword}" +
-                "?radius=2000&lat=${LocationRequester.getLocation()?.latitude}" +
+                "?lat=${LocationRequester.getLocation()?.latitude}" +
                 "&lon=${LocationRequester.getLocation()?.longitude}"
         println(url)
         val restaurantRequest = JsonArrayRequest(
@@ -58,12 +110,14 @@ class SearchActivity : AppCompatActivity() {
                     val title = restaurant.getString("name")
                     val address = restaurant.getString("address")
 
+                    // restaurant's name
                     val addingTextView = createTextView(title, Color.WHITE, Color.BLACK)
                     addingTextView.setPadding(30, 30, 15, 30)
                     addingTextView.layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, 150
                     )
 
+                    // restaurant's address
                     val addressTextView = createTextView("-  $address", Color.WHITE, Color.GRAY, textSize = 14f)
                     addressTextView.ellipsize = TextUtils.TruncateAt.END
                     addressTextView.setPadding(15, 30, 30, 30)
@@ -71,6 +125,7 @@ class SearchActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
                     )
 
+                    // group both
                     val linearRow = LinearLayout(this)
                     linearRow.layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -78,6 +133,13 @@ class SearchActivity : AppCompatActivity() {
                     linearRow.addView(addingTextView)
                     linearRow.addView(addressTextView)
 
+                    // handle action
+                    linearRow.setOnClickListener {
+                        val name = linearRow.getChildAt(0) as TextView
+                        Toast.makeText(this, name.text, Toast.LENGTH_SHORT).show()
+                    }
+
+                    // divider
                     val divider = View(this)
                     divider.layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, 1)
@@ -107,6 +169,12 @@ class SearchActivity : AppCompatActivity() {
 
         // show loading spinner
         loading_spinner_searchpage.visibility = View.VISIBLE
+    }
+
+    fun makeSearchBarFocus() {
+        search_bar_search_page.requestFocus()
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(search_bar_search_page, InputMethodManager.SHOW_IMPLICIT)
     }
 
     fun createTextView(title: String, bgColor: Int, textColor: Int,

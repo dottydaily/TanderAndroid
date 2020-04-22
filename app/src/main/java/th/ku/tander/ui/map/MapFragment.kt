@@ -79,7 +79,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
             // request
             val url = "https://tander-webservice.an.r.appspot.com/restaurants/search/" +
-                    "?radius=2000&lat=${currentLocation?.latitude}&lon=${currentLocation?.longitude}"
+                    "?lat=${currentLocation?.latitude}&lon=${currentLocation?.longitude}"
             println(url)
             val restaurantRequest = JsonArrayRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
