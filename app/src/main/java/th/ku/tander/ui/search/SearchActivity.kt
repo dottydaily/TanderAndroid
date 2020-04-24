@@ -58,9 +58,13 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.filter_button -> {
-            val popupFilter = Intent(this, FilterPopUpWindow::class.java)
-            popupFilter.putExtra("keyword", keyword)
+            val popupFilter = Intent(this, FilterActivity::class.java)
             startActivityForResult(popupFilter, FILTER_ACTIVITY_REQUEST_CODE)
+            true
+        }
+
+        android.R.id.home -> {
+            finish()
             true
         }
 
@@ -76,13 +80,11 @@ class SearchActivity : AppCompatActivity() {
 
         if (requestCode == FILTER_ACTIVITY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                val keyword = data?.getStringExtra("search")
-
                 if (keyword.isNullOrBlank()) {
                     Toast.makeText(this, "No search.", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Searching: ${keyword}", Toast.LENGTH_SHORT).show()
-                    requestRestaurantBySearch(keyword)
+                    requestRestaurantBySearch(keyword!!)
                 }
             }
         }

@@ -14,10 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.search.CategorySelectActivity"
-            android:parentActivityName=".ui.search.FilterPopUpWindow" />
+            android:name=".ui.search.CategoryActivity"
+            android:parentActivityName=".ui.search.FilterActivity" />
         <activity
-            android:name=".ui.search.FilterPopUpWindow"
+            android:name=".ui.search.FilterActivity"
             android:parentActivityName=".ui.search.SearchActivity" />
         <activity
             android:name=".ui.search.SearchActivity"

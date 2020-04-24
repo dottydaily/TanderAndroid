@@ -92,4 +92,5 @@ I/System.out: On Pause</string>
     <string name="filter_button_text">Filter</string>
     <string name="category_select_cancel_button_text">Cancel</string>
     <string name="category_select_button_text">Select</string>
+    <string name="category_clear_button_text">Clear</string>
 </resources>
