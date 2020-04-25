@@ -11,21 +11,21 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.json.JSONArray
 import th.ku.tander.R
-import th.ku.tander.helper.JSONParser
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
-import th.ku.tander.model.Restaurant
 import th.ku.tander.ui.search.SearchActivity
 
 class MapFragment : Fragment(), OnMapReadyCallback {
@@ -33,14 +33,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var mMap: GoogleMap? = null
     private var currentLocation: LatLng? = null
     private lateinit var mapFragment: SupportMapFragment
-//    private var restaurants: ArrayList<Restaurant> = ArrayList()
     private var restaurants: JSONArray? = null
-//    private lateinit var response: JSONArray
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         println("On CreateView")
 
@@ -48,14 +46,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
 
         // handle searchbar action
-        val searchBar = view.findViewById<EditText>(R.id.search_bar)
-        searchBar.setOnClickListener {
-            println("Launching Search Activity")
-            val intent = Intent(requireContext(), SearchActivity::class.java)
-            intent.putExtra("EXTRA_LOCATION", currentLocation!!)
-
-            startActivity(intent)
-        }
+//        val searchBar = view.findViewById<EditText>(R.id.search_bar)
+//        handleSearchBarBehavior()
 
         // implement google map fragment
         mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
@@ -73,15 +65,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        handleSearchBarBehavior()
+
         if (restaurants == null) {
             mMap = googleMap
-            val queue = RequestManager.getQueue()
 
             // request
             val url = "https://tander-webservice.an.r.appspot.com/restaurants/search/" +
                     "?lat=${currentLocation?.latitude}&lon=${currentLocation?.longitude}"
             println(url)
-            val restaurantRequest = JsonArrayRequest(Request.Method.GET, url, null,
+            val restaurantRequest = JsonArrayRequest(
+                Request.Method.GET, url, null,
                 Response.Listener { response ->
                     println("========== Got response! ==========")
 
@@ -94,12 +88,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     println(error.message)
                 }
             )
-            restaurantRequest.setRetryPolicy(DefaultRetryPolicy(
+            restaurantRequest.setRetryPolicy(
+                DefaultRetryPolicy(
                 5000, 3, 1.0F
-            ))
+            )
+            )
 
-            queue.add(restaurantRequest)
-            queue.start()
+            RequestManager.add(restaurantRequest)
+//            RequestManager.startRequest()
         } else {
             Handler().postDelayed( {
                 setDataOnMap(restaurants!!)
@@ -107,45 +103,39 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        println("On Pause")
-
-//        val fragmentTransaction = childFragmentManager.beginTransaction()
-//        fragmentTransaction.hide(mapFragment)
-//        fragmentTransaction.commit()
-//        loadingSpinner.visibility = View.VISIBLE
-//        search_bar.visibility = View.INVISIBLE
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapFragment.onSaveInstanceState(outState)
     }
 
-    override fun onResume() {
-        super.onResume()
+//    override fun onResume() {
+//        super.onResume()
+//
+//        println("On Resume")
+//
+//        if (mMap != null) {
+//            println("Reloading map fragment ${restaurants?.length()}")
+//            search_bar.visibility = View.VISIBLE
+//        }
+//    }
 
-        println("On Resume")
+    override fun onPause() {
+        super.onPause()
 
-        if (mMap != null) {
-            println("Reloading map fragment ${restaurants?.length()}")
-            search_bar.visibility = View.VISIBLE
-        }
+        println("========== PAUSE : MAP FRAGMENT ==========")
     }
 
     ///////////////////
     // helper method //
     ///////////////////
 
-    fun setDataOnMap(jsonArray: JSONArray) {
+    private fun setDataOnMap(jsonArray: JSONArray) {
         // save the response result
         restaurants = jsonArray
 
         // showing map fragment and remove spinner
         revealFragment(mapFragment, true)
-        loading_spinner.visibility = View.INVISIBLE
+        loading_progessbar.visibility = View.INVISIBLE
         search_bar.visibility = View.VISIBLE
 
 //        restaurants.forEach {
@@ -165,7 +155,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // show/hide mapfragment
-    fun revealFragment(fragment: SupportMapFragment, isShow: Boolean) {
+    private fun revealFragment(fragment: SupportMapFragment, isShow: Boolean) {
         val fragmentTransaction = childFragmentManager.beginTransaction()
 
         if (isShow) {
@@ -177,8 +167,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         fragmentTransaction.commit()
     }
 
-    fun hideKeyboard(context: Context, editText: EditText) {
+    private fun hideKeyboard(context: Context, editText: EditText) {
         val imm = context as InputMethodManager
         imm.hideSoftInputFromWindow(editText.windowToken, 0)
+    }
+
+    private fun handleSearchBarBehavior() {
+        search_bar.setOnClickListener {
+            println("Launching Search Activity")
+            val intent = Intent(requireContext(), SearchActivity::class.java)
+            intent.putExtra("EXTRA_LOCATION", currentLocation!!)
+
+            startActivity(intent)
+        }
     }
 }

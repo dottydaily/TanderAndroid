@@ -30,7 +30,7 @@
         android:visibility="invisible"/>
 
     <ProgressBar
-        android:id="@+id/loading_spinner"
+        android:id="@+id/loading_progessbar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

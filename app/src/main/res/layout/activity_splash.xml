@@ -17,7 +17,7 @@
         app:srcCompat="@drawable/ic_splash_logo" />
 
     <ProgressBar
-        android:id="@+id/loading_spinner"
+        android:id="@+id/loading_progessbar"
         style="?android:attr/progressBarStyleHorizontal"
         android:indeterminateOnly="true"
         android:layout_width="match_parent"
