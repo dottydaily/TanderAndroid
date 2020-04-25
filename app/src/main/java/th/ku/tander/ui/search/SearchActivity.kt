@@ -219,12 +219,18 @@ class SearchActivity : AppCompatActivity() {
         linearRow.addView(addingTextView)
         linearRow.addView(addressTextView)
 
-        linearRow.setOnTouchListener { v, event ->
+        linearRow.setOnClickListener {
             val titleTextView = linearRow.getChildAt(0) as TextView
             val addressTextView = linearRow.getChildAt(1) as TextView
             Toast.makeText(this, titleTextView.text, Toast.LENGTH_SHORT).show()
-            true
         }
+
+//        linearRow.setOnTouchListener { v, event ->
+//            val titleTextView = linearRow.getChildAt(0) as TextView
+//            val addressTextView = linearRow.getChildAt(1) as TextView
+//            Toast.makeText(this, titleTextView.text, Toast.LENGTH_SHORT).show()
+//            true
+//        }
 
         return linearRow
     }

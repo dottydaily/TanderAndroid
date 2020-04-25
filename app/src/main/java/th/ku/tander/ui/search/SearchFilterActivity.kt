@@ -141,7 +141,7 @@ class SearchFilterActivity : AppCompatActivity() {
     }
 
     private fun setFilterButton() {
-        filter_button.setOnTouchListener { v, event ->
+        filter_button.setOnClickListener {
             val intent = Intent()
             intent.putExtra("startPrice", startPrice)
             intent.putExtra("category", category)
@@ -151,7 +151,6 @@ class SearchFilterActivity : AppCompatActivity() {
             finish()
 
             println("Back with filter result.")
-            true
         }
     }
 }

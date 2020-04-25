@@ -124,25 +124,23 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     private fun setClearButtonBehavior() {
-        category_clear_button.setOnTouchListener { v, event ->
+        category_clear_button.setOnClickListener {
             if (selectedButton != null) {
                 selectedButton?.setBackgroundColor(Color.WHITE)
                 selectedButton?.setTextColor(Color.BLACK)
 
                 selectedButton = null
             }
-            true
         }
     }
 
     private fun setSelectButtonBehavior() {
-        category_select_button.setOnTouchListener { v, event ->
+        category_select_button.setOnClickListener {
             val intent = Intent()
             if (selectedButton != null)
                 intent.putExtra("category", selectedButton?.text.toString())
             setResult(Activity.RESULT_OK, intent)
             finish()
-            true
         }
     }
 
