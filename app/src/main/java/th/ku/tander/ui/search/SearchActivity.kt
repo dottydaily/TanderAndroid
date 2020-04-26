@@ -53,7 +53,6 @@ class SearchActivity : AppCompatActivity() {
                 keyword = search_bar_search_page.text.toString()
                 requestRestaurantBySearch(keyword!!)
                 search_result_table.removeAllViews()
-                true
             }
             false
         }
@@ -259,6 +258,9 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun customizeHint() {
+        if (keyword != null) {
+            search_bar_search_page.hint = keyword
+        }
         if (startPrice != 0) {
             val hint = search_bar_search_page.hint
             search_bar_search_page.hint = "$hint [StartPrice: $startPrice]"

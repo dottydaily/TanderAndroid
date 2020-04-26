@@ -135,7 +135,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // showing map fragment and remove spinner
         revealFragment(mapFragment, true)
-        loading_progessbar.visibility = View.INVISIBLE
+        loading_spinner_map.visibility = View.INVISIBLE
         search_bar.visibility = View.VISIBLE
 
 //        restaurants.forEach {

@@ -3,9 +3,7 @@ package th.ku.tander.helper
 import android.content.Context
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.DiskBasedCache
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.*
 
 object RequestManager {
     @Volatile
@@ -21,6 +19,14 @@ object RequestManager {
     }
 
     fun add(request: JsonArrayRequest) {
+        requestQueue?.add(request)
+    }
+
+    fun add(request: JsonObjectRequest) {
+        requestQueue?.add(request)
+    }
+
+    fun add(request: StringRequest) {
         requestQueue?.add(request)
     }
 }

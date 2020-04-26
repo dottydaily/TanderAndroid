@@ -7,6 +7,18 @@
     android:background="#FFFFFF"
     tools:context=".ui.login.LogInActivity">
 
+    <ProgressBar
+        android:id="@+id/loading_spinner_login"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/colorPrimary"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/login_logo"
         android:layout_width="300dp"

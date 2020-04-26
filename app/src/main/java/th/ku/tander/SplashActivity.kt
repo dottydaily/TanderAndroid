@@ -2,7 +2,6 @@ package th.ku.tander
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.Observer
@@ -55,7 +54,7 @@ class SplashActivity : AppCompatActivity() {
         println("Checking login")
 
         var sp = getSharedPreferences("TANDER", Context.MODE_PRIVATE)
-        val token = sp.getString("token", null)
+        val token = sp.getString("TOKEN", null)
 
         if (token == null) {
             startActivity(Intent(this, LogInActivity::class.java))
