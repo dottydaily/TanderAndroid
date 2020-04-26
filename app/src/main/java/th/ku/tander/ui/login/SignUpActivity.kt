@@ -10,9 +10,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import com.android.volley.NetworkResponse
-import com.android.volley.Request
-import com.android.volley.Response
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import kotlinx.android.synthetic.main.activity_sign_up.*
@@ -30,6 +28,7 @@ class SignUpActivity : AppCompatActivity() {
     private var telephone: String? = null
     private var username: String? = null
     private var password: String? = null
+    private var searchStatusCode: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +44,7 @@ class SignUpActivity : AppCompatActivity() {
 
         handleSignUpButtonBehavior()
         handleBackToLoginButtonBehavior()
+        handleUsernameSignUpEditTextBehavior()
         handlePasswordSignUpEditTextBehavior()
     }
 
@@ -85,7 +85,8 @@ class SignUpActivity : AppCompatActivity() {
         password = password_signup_edit_text.text.toString()
 
         return !(firstName.isNullOrBlank() || lastName.isNullOrBlank() ||
-                email.isNullOrBlank() || telephone.isNullOrBlank() ||
+                birthDate.isNullOrBlank() || email.isNullOrBlank() ||
+                telephone.isNullOrBlank() || searchStatusCode != 404 ||
                 username.isNullOrBlank() || password.isNullOrBlank())
     }
 
@@ -125,7 +126,7 @@ class SignUpActivity : AppCompatActivity() {
                     Response.ErrorListener { error ->
                         loading_spinner_signup.visibility = View.INVISIBLE
 
-                        println(error)
+                        println(error.message)
                         Toast.makeText(this, "Server error occurred. Please try again.",
                             Toast.LENGTH_SHORT).show()
                     }) {
@@ -141,7 +142,7 @@ class SignUpActivity : AppCompatActivity() {
 
                 RequestManager.add(signUpRequest)
             } else {
-                Toast.makeText(this, "Please enter all information.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please enter all valid information.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -149,6 +150,56 @@ class SignUpActivity : AppCompatActivity() {
     private fun handleBackToLoginButtonBehavior() {
         backto_login_button.setOnClickListener {
             finish()
+        }
+    }
+
+    private fun handleUsernameSignUpEditTextBehavior() {
+        username_signup_edit_text.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                val searchUsername = username_signup_edit_text.text.toString()
+
+                if (!searchUsername.isNullOrBlank()) {
+                    val url = "https://tander-webservice.an.r.appspot.com/users/available/$searchUsername"
+                    println(url)
+                    val searchUserRequest = object: StringRequest(Request.Method.GET, url,
+                        Response.Listener { response ->
+                            println("STATUS CODE: $searchStatusCode")
+
+                            username_signup_title.text = "ALREADY HAVE THIS ACCOUNT - USERNAME"
+                            username_signup_title.setTextColor(Color.RED)
+                            username_signup_edit_text.setTextColor(Color.RED)
+                            Toast.makeText(this, response, Toast.LENGTH_SHORT).show()
+                        },
+                        Response.ErrorListener { _ ->
+                            if (searchStatusCode == 404) {
+                                println("STATUS CODE: $searchStatusCode")
+
+                                val color = Color.parseColor("#0b8500")
+                                username_signup_title.text = "USERNAME"
+                                username_signup_title.setTextColor(color)
+                                username_signup_edit_text.setTextColor(color)
+                            }
+                        }
+                    ) {
+                        override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
+                            searchStatusCode = response?.statusCode
+                            return super.parseNetworkResponse(response)
+                        }
+
+                        override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+                            searchStatusCode = volleyError?.networkResponse?.statusCode
+                            return super.parseNetworkError(volleyError)
+                        }
+                    }
+
+                    searchUserRequest.setRetryPolicy(
+                        DefaultRetryPolicy(3000, 3, 2f)
+                    )
+
+                    RequestManager.add(searchUserRequest)
+                }
+            }
+            false
         }
     }
 
