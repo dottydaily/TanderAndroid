@@ -29,4 +29,8 @@ object RequestManager {
     fun add(request: StringRequest) {
         requestQueue?.add(request)
     }
+
+    fun add(request: ImageRequest) {
+        requestQueue?.add(request)
+    }
 }
