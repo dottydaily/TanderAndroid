@@ -33,4 +33,11 @@
     <string name="password_signup_title_text">PASSWORD</string>
     <string name="password_signup_edit_text_hint">Fill in the password</string>
     <string name="backto_login_button_text">Back to Log in</string>
+    <string name="lobby_join_button_text">Join</string>
+    <string name="lobby_participants_title_text">Participants</string>
+    <string name="lobby_expand_button_text">More\nDetail</string>
+    <string name="lobby_expand_button_text_when_show">Hide</string>
+    <string name="participant_host_username_title_text">Host</string>
+    <string name="long_description_text_example">D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0) D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0) D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0)</string>
+    <string name="lobby_room_descripton_title_text">Description</string>
 </resources>

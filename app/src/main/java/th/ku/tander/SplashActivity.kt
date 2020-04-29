@@ -1,11 +1,11 @@
 package th.ku.tander
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import com.google.android.gms.maps.model.LatLng
+import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
 import th.ku.tander.ui.login.LogInActivity
@@ -20,6 +20,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        KeyStoreManager.start(applicationContext)
         RequestManager.start(applicationContext)
 
         print("========== Requesting Location Permissions ==========")
@@ -53,8 +54,9 @@ class SplashActivity : AppCompatActivity() {
     fun checkLogin() {
         println("Checking login")
 
-        var sp = getSharedPreferences("TANDER", Context.MODE_PRIVATE)
-        val token = sp.getString("TOKEN", null)
+//        KeyStoreManager.clearAll()
+
+        val token = KeyStoreManager.getData("TOKEN")
 
         if (token == null) {
             startActivity(Intent(this, LogInActivity::class.java))

@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_log_in.*
 import org.json.JSONObject
 import th.ku.tander.MainActivity
 import th.ku.tander.R
+import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
 
 class LogInActivity : AppCompatActivity() {
@@ -130,11 +131,17 @@ class LogInActivity : AppCompatActivity() {
             val loginRequest = JsonObjectRequest(Request.Method.POST, url, requestBody,
                 Response.Listener { response ->
                     val token = response["accessToken"] as String
-                    println(token)
-                    val spEditor = getSharedPreferences("TANDER",
-                        Context.MODE_PRIVATE).edit()
-                    spEditor.putString("TOKEN", token)
-                    spEditor.commit()
+                    val user = credentials["username"]!!
+                    println("$user : $token")
+
+                    // save to sharedPreferences
+                    KeyStoreManager.saveData("TOKEN", token)
+                    KeyStoreManager.saveData("USER", user)
+
+                    val resultToken = KeyStoreManager.getData("TOKEN")
+                    val resultUser = KeyStoreManager.getData("USER")
+                    resultToken.let { println("resultToken: $it") }
+                    resultUser.let { println("resultUser: $it") }
 
                     // go to main page
                     val mainPage = Intent(this, MainActivity::class.java)

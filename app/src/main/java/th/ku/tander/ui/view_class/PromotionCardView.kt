@@ -87,6 +87,7 @@ class PromotionCardView : CardView {
         )
         layoutParams.setMargins(50, 30, 50, 30)
         this.layoutParams = layoutParams
+        this.cardElevation = 10f
 
         this.addView(contentLayout)
     }

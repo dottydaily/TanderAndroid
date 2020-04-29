@@ -1,49 +1,53 @@
 package th.ku.tander.model
 
-import com.beust.klaxon.Json
 import com.google.android.gms.maps.model.LatLng
+import org.json.JSONObject
 
-class Restaurant{
-    @Json(ignored = true) var position: LatLng = LatLng(0.0, 0.0)
-    var categories: ArrayList<String>
-    @Json(name = "_id") var objectID: String = "DEFAULT_OBJECT_ID"
-    var placeID: String = "DEFAULT_PLACE_ID"
-    var name: String = "DEFAULT_NAME"
-    var url: String = "DEFAULT_URL"
-    var startPrice: Double = 0.0
-    var address: String = "DEFAULT_ADDRESS"
-    var isPartner: Boolean = false
+class Restaurant() {
+    lateinit var position: LatLng private set
+    lateinit var categories: ArrayList<String> private set
+    lateinit var promotions: ArrayList<String> private set
+    lateinit var restaurantId: String private set
+    lateinit var name: String private set
+    lateinit var url: String private set
+    var startPrice: Double = 0.0; private set
+    lateinit var address: String private set
+    var isPartner: Boolean = false; private set
+    lateinit var restaurantJson: JSONObject private set
 
     init {
         println("Instantiating a Restaurant object.")
     }
 
-    constructor(categories: ArrayList<String>,
-                objectID: String, placeID: String, name: String, url: String,
-                startPrice: Double, address: String, isPartner: Boolean) {
-        this.categories = categories
-        this.objectID = objectID
-        this.placeID = placeID
-        this.name = name
-        this.url = url
-        this.startPrice = startPrice
-        this.address = address
-        this.isPartner = isPartner
+    constructor(json: JSONObject): this() {
+        this.restaurantJson = json
+
+        val pos = json.getJSONObject("position")
+        position = LatLng(pos.getDouble("lat"), pos.getDouble("lon"))
+
+        val category = json.getJSONArray("categories")
+        categories = arrayListOf()
+        for (i in 0 until category.length()) {
+            categories.add(category.getString(i))
+        }
+
+        val promotion = json.getJSONArray("promotions")
+        promotions = arrayListOf()
+        for (i in 0 until promotion.length()) {
+            promotions.add(promotion.getString(i))
+        }
+
+        restaurantId = json.getString("_id")
+        name = json.getString("name")
+        url = json.getString("url")
+        startPrice = json.getDouble("startPrice")
+        address = json.getString("address")
+        isPartner = json.getBoolean("isPartner")
     }
 
+    fun toJson(): JSONObject = restaurantJson
+
     override fun toString(): String {
-        return """
-            {
-                "position": {"lat": ${position.latitude}, "lon": ${position.longitude}},
-                "categories": ${categories},
-                "_id": "${objectID}",
-                "placeId": "${placeID}",
-                "name": "${name}",
-                "url": "${if (url == "DEFAULT_URL") "" else url}",
-                "startPrice": ${startPrice},
-                "address": "${address}",
-                "isPartner": ${isPartner}
-            }
-        """.trimIndent()
+        return restaurantJson.toString(2)
     }
 }

@@ -1,5 +1,9 @@
 package th.ku.tander.helper
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Base64
+import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -7,44 +11,37 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 object KeyStoreManager {
-    @Volatile private var ks: KeyStore? = null
-    @Volatile private var iv: ByteArray? = null
+    @Volatile private var context: Context? = null
+    @Volatile private var sharedPreferences: SharedPreferences? = null
 
-    fun start() {
-        if (ks == null) {
-            ks = KeyStore.getInstance("AndroidKeyStore").apply {
-                load(null)
-            }
+    fun start(context: Context) {
+        if (this.context == null) {
+            this.context = context
+        }
+        if (sharedPreferences == null) {
+            sharedPreferences = EncryptedSharedPreferences.create(
+                "TANDER", getAlias(), context,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
         }
     }
 
-    fun encrypt(data: String): ByteArray? {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
-        iv = cipher.iv
+    fun saveData(name: String, data: String) {
+        val editor = sharedPreferences?.edit()
 
-        return cipher.doFinal(data.toByteArray())
+        editor?.putString(name, data)
+        editor?.commit()
     }
 
-    fun decrypt(encrypted: ByteArray): String {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val spec = GCMParameterSpec(128, iv)
-        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), spec)
-
-        val decoded = cipher.doFinal(encrypted)
-        return String(decoded, Charsets.UTF_8)
+    fun getData(name: String): String? {
+        return sharedPreferences?.getString(name, null)
     }
 
-    private fun getSecretKey(): SecretKey {
-        val aliasKeyStore = getAlias()
-
-        if (ks == null) {
-            start()
-        }
-
-        val secretKeyEntry = ks?.getEntry(aliasKeyStore, null) as KeyStore.SecretKeyEntry
-
-        return secretKeyEntry.secretKey
+    fun clearAll() {
+        val editor = sharedPreferences?.edit()
+        editor?.clear()
+        editor?.commit()
     }
 
     private fun getAlias(): String{

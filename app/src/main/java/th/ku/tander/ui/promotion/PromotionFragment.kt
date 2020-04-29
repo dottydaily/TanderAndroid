@@ -1,29 +1,26 @@
 package th.ku.tander.ui.promotion
 
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_promotion.*
 import org.json.JSONArray
 import th.ku.tander.R
-import th.ku.tander.model.Restaurant
 import th.ku.tander.ui.view_class.PromotionCardView
 
 class PromotionFragment : Fragment() {
 
-    private lateinit var promotionViewModel: PromotionViewModel
+    private val promotionViewModel by viewModels<PromotionViewModel> {
+        PromotionViewModelFactory(this.requireContext())
+    }
+
     private var cardViewsMap: HashMap<String, CardView> = HashMap()
     private var imageMap: HashMap<String, Bitmap>? = null
 
@@ -32,7 +29,6 @@ class PromotionFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        promotionViewModel = PromotionViewModel(requireContext())
 
         return inflater.inflate(R.layout.fragment_promotion, container, false)
     }
@@ -49,9 +45,8 @@ class PromotionFragment : Fragment() {
         println("========== RESUME: Promotion ==========")
 
         // observer for image
-        val loadImageCountObserver = Observer<Int> { count ->
-            println(count)
-            if (promotionViewModel.isDoneLoading() ) {
+        val statusObserver = Observer<Boolean> { isDone ->
+            if (isDone) {
                 println("\nCOMPLETE -------------------------------------------\n")
                 val promotionDetails = promotionViewModel.getPromotionDetail().value!!
                 this.imageMap = promotionViewModel.getImageMap()
@@ -61,7 +56,7 @@ class PromotionFragment : Fragment() {
         }
 
         promotionViewModel.fetchPromotion()
-        promotionViewModel.getLoadImageCount().observe(viewLifecycleOwner, loadImageCountObserver)
+        promotionViewModel.getStatus().observe(viewLifecycleOwner, statusObserver)
     }
 
     override fun onPause() {

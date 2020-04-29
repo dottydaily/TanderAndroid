@@ -6,4 +6,5 @@
     <color name="colorProgressTintBackground">#4A4D5E</color>
     <color name="colorSearchBar">#E8E8E8</color>
     <color name="colorButton">#FFFFFF</color>
+    <color name="colorDescription">#6E6E6E</color>
 </resources>
