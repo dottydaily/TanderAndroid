@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.Observer
+import com.android.volley.Response
 import com.google.android.gms.maps.model.LatLng
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.LocationRequester
@@ -53,17 +54,29 @@ class SplashActivity : AppCompatActivity() {
 
     fun checkLogin() {
         println("Checking login")
-
 //        KeyStoreManager.clearAll()
 
+        val name = KeyStoreManager.getData("USER")
         val token = KeyStoreManager.getData("TOKEN")
 
-        if (token == null) {
-            startActivity(Intent(this, LogInActivity::class.java))
+        if (name != null && token != null) {
+            RequestManager.verifyToken(name, token,
+                Response.Listener {
+                    val isVerify = it.toBoolean()
+                    if (isVerify) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    } else {
+                        startActivity(Intent(this, LogInActivity::class.java))
+                        finish()
+                    }
+                }, Response.ErrorListener { error ->
+                    error.printStackTrace()
+                }
+            )
         } else {
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, LogInActivity::class.java))
+            finish()
         }
-
-        finish()
     }
 }

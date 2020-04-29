@@ -11,18 +11,6 @@
         android:layout_height="match_parent"
         android:background="#E6E6E6">
 
-        <ProgressBar
-            android:id="@+id/loading_spinner_category"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminateTint="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="visible" />
-
         <ScrollView
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -41,6 +29,18 @@
             </TableLayout>
 
         </ScrollView>
+
+        <ProgressBar
+            android:id="@+id/loading_spinner_category"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/filter_button_bar"

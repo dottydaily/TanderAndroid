@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.android.volley.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
 import th.ku.tander.model.Restaurant
 
@@ -15,6 +16,8 @@ class NearbyViewModel : ViewModel() {
     private var lobbyDetailArray = MutableLiveData<JSONArray>().apply { value = JSONArray() }
     private var restaurantIdSet: HashSet<String> = HashSet()
     private var restaurantMap: HashMap<String, Restaurant> = HashMap()
+    var joinedLobbyId: String? = null; private set
+    private var username: String = KeyStoreManager.getData("USER")!!
 
     fun getStatus(): LiveData<Boolean> = status
     fun getLobbyDetail(): LiveData<JSONArray> = lobbyDetailArray
@@ -22,6 +25,8 @@ class NearbyViewModel : ViewModel() {
 
     // fetch lobby info
     fun fetchLobby() {
+        clearCurrentData()
+
         val url = "https://tander-webservice.an.r.appspot.com/lobbies"
 
         RequestManager.getJsonArrayRequestWithToken(url,
@@ -31,6 +36,20 @@ class NearbyViewModel : ViewModel() {
                 // save all restaurantId by using set
                 for (i in 0 until response.length()) {
                     val lobby = response.getJSONObject(i)
+
+                    // check if you did join lobby or not
+                    if (joinedLobbyId.isNullOrBlank()) {
+                        val participants = lobby.getJSONArray("participant")
+
+                        for (j in 0 until participants.length()) {
+                            val currentUser = participants.getString(j)
+
+                            if (username == currentUser) {
+                                joinedLobbyId = lobby.getString("_id")
+                                break
+                            }
+                        }
+                    }
 
                     val restaurantId = lobby.getString("restaurantId")
                     restaurantIdSet.add(restaurantId)
@@ -70,5 +89,14 @@ class NearbyViewModel : ViewModel() {
 
         RequestManager.postRequestWithBodyBySet(url, "restaurantIds", restaurantIdSet,
             listener, errorListener, 3000, 3, 2f)
+    }
+
+    // reset data before start fetching
+    private fun clearCurrentData() {
+        status.value = false
+        lobbyDetailArray.value = JSONArray()
+        restaurantIdSet = HashSet()
+        restaurantMap = HashMap()
+        joinedLobbyId = null
     }
 }

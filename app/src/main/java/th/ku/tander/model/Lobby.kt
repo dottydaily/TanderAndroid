@@ -8,7 +8,9 @@ class Lobby() {
     lateinit var lobbyId: String
     lateinit var name: String
     lateinit var restaurantId: String
+    lateinit var startFullTime: String
     lateinit var startTime: String
+    lateinit var startDate: String
     lateinit var description: String
     var maxParticipant: Int = 0
     lateinit var lobbyStatus: String
@@ -24,7 +26,9 @@ class Lobby() {
         lobbyId = json.getString("_id")
         name = json.getString("lobbyName")
         restaurantId = json.getString("restaurantId")
-        startTime = json.getString("startTime")
+        startFullTime = json.getString("startTime")
+        startDate = startFullTime.substring(0, 10)
+        startTime = startFullTime.substring(11, 16)
         description = json.getString("description")
         maxParticipant = json.getInt("maxParticipant")
         lobbyStatus = json.getString("lobbyStatus")
@@ -46,7 +50,7 @@ class Lobby() {
         val jsonArray = JSONArray(participant)
         lobbyJson.put("participant", jsonArray)
         lobbyJson.put("lobbyName", name)
-        lobbyJson.put("startTime", startTime)
+        lobbyJson.put("startTime", startFullTime)
         lobbyJson.put("description", description)
         lobbyJson.put("maxParticipant", maxParticipant)
         lobbyJson.put("lobbyStatus", lobbyStatus)

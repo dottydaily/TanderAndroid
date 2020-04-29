@@ -40,4 +40,7 @@
     <string name="participant_host_username_title_text">Host</string>
     <string name="long_description_text_example">D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0) D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0) D/EGL_emulation: eglMakeCurrent: 0xebcb8dc0: ver 3 0 (tinfo 0xde7881e0)</string>
     <string name="lobby_room_descripton_title_text">Description</string>
+    <string name="lobby_room_button_participant_leave_text">Leave Group</string>
+    <string name="lobby_room_button_owner_edit_text">Edit Lobby</string>
+    <string name="lobby_room_button_owner_main_text">Start Eating</string>
 </resources>

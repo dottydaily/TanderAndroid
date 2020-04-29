@@ -110,6 +110,7 @@ class LogInActivity : AppCompatActivity() {
         hideKeyboard(this, login_button)
 
         val url = "https://tander-webservice.an.r.appspot.com/users/login"
+        println(url)
 
         username = username_edit_text.text.toString()
         password = password_edit_text.text.toString()

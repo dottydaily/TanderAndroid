@@ -41,6 +41,21 @@ object RequestManager {
         requestQueue?.add(request)
     }
 
+    fun verifyToken(name: String, token: String,
+                    listener: Response.Listener<String>, errorListener: Response.ErrorListener) {
+
+        val map = HashMap<String, String>()
+        map["username"] = name
+        map["token"] = token
+
+        val body = JSONObject(map as Map<*, *>)
+        val url = "https://tander-webservice.an.r.appspot.com/users/verify"
+
+        postRequestWithBody(url, body,
+            listener, errorListener, 3000, 3, 2f
+        )
+    }
+
     fun getJsonArrayRequestWithToken(url: String, listener: Response.Listener<JSONArray>,
                             errorListener: Response.ErrorListener,
                             retryTime: Int, retryCount: Int, retryBackoff: Float) {
@@ -82,6 +97,7 @@ object RequestManager {
     fun postRequestWithBody(url: String, body: JSONObject,
                                 listener: Response.Listener<String>, errorListener: Response.ErrorListener,
                                 retryTime: Int, retryCount: Int, retryBackoff: Float) {
+        println(url)
 
         val stringRequest = object: StringRequest(Request.Method.POST, url, listener, errorListener) {
             override fun getHeaders(): MutableMap<String, String> {

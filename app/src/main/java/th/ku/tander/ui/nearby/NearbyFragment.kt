@@ -71,14 +71,21 @@ class NearbyFragment : Fragment() {
         println(lobbyJson.toString())
 
         val contentLayout = requireActivity().findViewById<LinearLayout>(R.id.lobby_linear_layout_view)
+        contentLayout.removeAllViews()
 
         for (i in 0 until lobbyJson.length()) {
             val lobby = lobbyJson.getJSONObject(i)
             val restaurantId = lobby.getString("restaurantId")
             val restaurantJson = nearbyViewModel.getRestaurantJsonById(restaurantId)!!
 
-            val lobbyCardLayout = LobbyCardLayout(this.requireContext()
+            val lobbyCardLayout = LobbyCardLayout(this.requireContext(), this.requireActivity()
                 , lobbyJson[i].toString(), restaurantJson.toString())
+
+            nearbyViewModel.joinedLobbyId.let {
+                if (!it.isNullOrBlank()) {
+                    lobbyCardLayout.setJoinable(it)
+                }
+            }
 
             contentLayout.addView(lobbyCardLayout)
         }

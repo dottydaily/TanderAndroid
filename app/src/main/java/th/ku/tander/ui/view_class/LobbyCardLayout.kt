@@ -1,18 +1,22 @@
 package th.ku.tander.ui.view_class
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.android.volley.Response
+import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.lobby_card_view.view.*
 import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
 import th.ku.tander.model.Lobby
+import th.ku.tander.model.Restaurant
 import th.ku.tander.ui.lobby.LobbyActivity
 
 class LobbyCardLayout: FrameLayout {
@@ -28,6 +32,10 @@ class LobbyCardLayout: FrameLayout {
     private var lobbyJson: JSONObject
     private var currentParticipantNumber: Int
     private val primaryColorInt: Int
+    private val currentActivity: Activity
+
+    // for checking if joinable
+    private var isJoinable: Boolean = true
 
     // view
     private val lobbyTitleTextView: TextView
@@ -44,15 +52,17 @@ class LobbyCardLayout: FrameLayout {
     private var expandLayout: LinearLayout
     private var expandDivider: View
 
-    constructor(context: Context, lobbyJsonString: String, restaurantJsonString: String)
+    constructor(context: Context, activity: Activity, lobbyJsonString: String, restaurantJsonString: String)
             : super(context, null, 0) {
+
+        this.currentActivity = activity
 
         // inflate cardView into this framelayout
         LayoutInflater.from(context).inflate(R.layout.lobby_card_view, this)
 
         // parse JSONString into JSONObject
-        lobbyJson = JSONObject(lobbyJsonString)
-        restaurantJson = JSONObject(restaurantJsonString)
+        this.lobbyJson = JSONObject(lobbyJsonString)
+        this.restaurantJson = JSONObject(restaurantJsonString)
 
         this.lobbyTitle = lobbyJson.getString("lobbyName")
         this.restaurantName = restaurantJson.getString("name")
@@ -113,6 +123,19 @@ class LobbyCardLayout: FrameLayout {
         participantsTextView.text = participants
     }
 
+    // set if this lobby can join or not
+    // in case that you are still in another lobby
+    fun setJoinable(currentJoinId: String) {
+        val lobbyId = lobbyJson.getString("_id")
+
+        println("Check lobby $lobbyTitle if you can join this or not")
+        isJoinable = if (lobbyId == currentJoinId) { true } else {
+            joinButton.setBackgroundColor(Color.GRAY)
+            joinButton.text = "You are in another lobby"
+            false
+        }
+    }
+
     private fun setExpandButtonBehavior() {
         expandButton.setOnClickListener {
             isExpanded = !isExpanded
@@ -129,31 +152,54 @@ class LobbyCardLayout: FrameLayout {
 
     private fun setJoinButtonBehavior() {
         joinButton.setOnClickListener {
-            val username = KeyStoreManager.getData("USER")
+            if (isJoinable) {
+                val username = KeyStoreManager.getData("USER")
 
-            val lobby = Lobby(lobbyJson)
-            username.let { lobby.participant.add(it!!) }
-            lobbyJson = lobby.toJson()
+                val lobby = Lobby(lobbyJson)
+                username.let {
+                    if (lobby.participant.contains(it)) {
+                        // skipping update because you are already in this lobby
+                        val lobbyPage = Intent(this.context, LobbyActivity::class.java)
+                        lobbyPage.putExtra("lobbyJsonString", lobbyJson.toString())
+                        lobbyPage.putExtra("restaurantJsonString", restaurantJson.toString())
 
-            println(lobbyJson.toString(4))
-            println(restaurantJson.toString(4))
+                        context.startActivity(lobbyPage)
+                        Toast.makeText(this.context, "Joined! : ${lobby.name}",
+                            Toast.LENGTH_SHORT).show()
+                    } else {
+                        lobby.participant.add(it!!)
+                        lobbyJson = lobby.toJson()
 
-            val restaurantId = restaurantJson.getString("_id")
-            val url = "https://tander-webservice.an.r.appspot.com/lobbies/restaurantId/$restaurantId"
-
-            RequestManager.postRequestWithBody(url, lobbyJson,
-                Response.Listener { response ->
-                    println(response)
-
-                    Toast.makeText(this.context, "Joined!", Toast.LENGTH_SHORT).show()
-
-                    val lobbyPage = Intent(this.context, LobbyActivity::class.java)
-                    lobbyPage.putExtra("lobbyJsonString", lobbyJson.toString())
-                    lobbyPage.putExtra("restaurantJsonString", restaurantJson.toString())
-                    context.startActivity(lobbyPage)
-                }, Response.ErrorListener { error ->
-                    error.printStackTrace()
-                }, 3000, 3, 2f)
+                        sendLobbyUpdateToServer()
+                    }
+                }
+            }
         }
+    }
+
+    private fun sendLobbyUpdateToServer() {println(lobbyJson.toString())
+        println(restaurantJson.toString())
+
+        currentActivity.loading_spinner_nearby.visibility = View.VISIBLE
+
+        val restaurantId = restaurantJson.getString("_id")
+        val url = "https://tander-webservice.an.r.appspot.com/lobbies/restaurantId/$restaurantId"
+
+        RequestManager.postRequestWithBody(url, lobbyJson,
+            Response.Listener { response ->
+                println(response)
+
+                val lobbyPage = Intent(this.context, LobbyActivity::class.java)
+                lobbyPage.putExtra("lobbyJsonString", lobbyJson.toString())
+                lobbyPage.putExtra("restaurantJsonString", restaurantJson.toString())
+
+                context.startActivity(lobbyPage)
+                Toast.makeText(this.context,
+                    "Joined! : ${lobbyJson.getString("lobbyName")}",
+                    Toast.LENGTH_SHORT).show()
+            }, Response.ErrorListener { error ->
+                error.printStackTrace()
+            }, 3000, 3, 2f)
+
     }
 }
