@@ -44,4 +44,9 @@
     <string name="lobby_room_button_owner_edit_text">Edit Lobby</string>
     <string name="lobby_room_button_owner_main_text">Start Eating</string>
     <string name="splash_loading_text_view_text">LOADING...</string>
+    <string name="lobby_create_name_title_text">Lobby Name</string>
+    <string name="lobby_create_description_title_text">Lobby Description</string>
+    <string name="lobby_create_name_edit_text_hint">Fill in a lobby name</string>
+    <string name="lobby_create_description_edit_text">Fill in a lobby description</string>
+    <string name="how_many_participant">How many participant?:</string>
 </resources>

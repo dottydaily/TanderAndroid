@@ -1,5 +1,6 @@
 package th.ku.tander.ui.restaurant
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -10,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_restaurant.*
 import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.model.Restaurant
+import th.ku.tander.ui.lobby.CreateLobbyActivity
 
 class RestaurantActivity : AppCompatActivity() {
 
@@ -41,6 +43,8 @@ class RestaurantActivity : AppCompatActivity() {
         super.onResume()
 
         println("========== RESUME: RESTAURANT ==========")
+
+        handleCreateButton()
 
         restaurantViewModel.restaurant.observe(this, Observer {
             if (it != null) restaurantViewModel.fetchRestaurantImage()
@@ -103,5 +107,18 @@ class RestaurantActivity : AppCompatActivity() {
         }
 
         restaurantViewModel.image.value.let { restaurant_image_view.setImageBitmap(it) }
+    }
+
+    private fun handleCreateButton() {
+        restaurant_create_button.setOnClickListener {
+            val intent = Intent(this, CreateLobbyActivity::class.java)
+
+            restaurantViewModel.restaurant.apply {
+                if (value != null) {
+                    intent.putExtra("restaurantJson", value!!.toJson().toString())
+                    startActivity(intent)
+                }
+            }
+        }
     }
 }
