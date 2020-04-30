@@ -39,14 +39,19 @@ class NearbyViewModel : ViewModel() {
 
                     // check if you did join lobby or not
                     if (joinedLobbyId.isNullOrBlank()) {
+                        val hostname = lobby.getString("hostUsername")
                         val participants = lobby.getJSONArray("participant")
 
-                        for (j in 0 until participants.length()) {
-                            val currentUser = participants.getString(j)
+                        if (hostname == username) {
+                            joinedLobbyId = lobby.getString("_id")
+                        } else {
+                            for (j in 0 until participants.length()) {
+                                val currentUser = participants.getString(j)
 
-                            if (username == currentUser) {
-                                joinedLobbyId = lobby.getString("_id")
-                                break
+                                if (username == currentUser) {
+                                    joinedLobbyId = lobby.getString("_id")
+                                    break
+                                }
                             }
                         }
                     }

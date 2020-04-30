@@ -59,7 +59,7 @@ object RequestManager {
     fun getJsonArrayRequestWithToken(url: String, listener: Response.Listener<JSONArray>,
                             errorListener: Response.ErrorListener,
                             retryTime: Int, retryCount: Int, retryBackoff: Float) {
-        println(url)
+        println("GET: $url")
 
         val jsonArrayRequest = object: JsonArrayRequest(Request.Method.GET, url, null,
             listener, errorListener
@@ -82,10 +82,36 @@ object RequestManager {
         requestQueue?.add(jsonArrayRequest)
     }
 
+    fun deleteRequestWithToken(url: String, listener: Response.Listener<String>,
+                               errorListener: Response.ErrorListener, retryTime: Int,
+                               retryCount: Int, retryBackoff: Float) {
+        println("DELETE: $url")
+
+        val deleteRequest = object: StringRequest(Request.Method.DELETE, url,
+            listener, errorListener
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                if (token.isNullOrBlank()) {
+                    return super.getHeaders()
+                } else {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer ${RequestManager.token!!}"
+                    return headers
+                }
+            }
+        }
+
+        deleteRequest.setRetryPolicy(
+            DefaultRetryPolicy(retryTime, retryCount, retryBackoff)
+        )
+
+        RequestManager.add(deleteRequest)
+    }
+
     fun postRequestWithBodyBySet(url: String, bodyName: String, setToBody: HashSet<String>,
                                  listener: Response.Listener<String>, errorListener: Response.ErrorListener,
                                  retryTime: Int, retryCount: Int, retryBackoff: Float) {
-        println(url)
+        println("POST (for get): $url")
 
         val body = HashMap<String, Array<String>>()
         body[bodyName] = setToBody.toTypedArray()
@@ -97,7 +123,7 @@ object RequestManager {
     fun postRequestWithBody(url: String, body: JSONObject,
                                 listener: Response.Listener<String>, errorListener: Response.ErrorListener,
                                 retryTime: Int, retryCount: Int, retryBackoff: Float) {
-        println(url)
+        println("POST: $url")
 
         val stringRequest = object: StringRequest(Request.Method.POST, url, listener, errorListener) {
             override fun getHeaders(): MutableMap<String, String> {

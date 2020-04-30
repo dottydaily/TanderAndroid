@@ -41,6 +41,22 @@ class Lobby() {
         }
     }
 
+    constructor(name: String, restaurantId: String, startTime: String, description: String,
+                maxParticipant: Int, participant: HashSet<String>, lobbyStatus: String): this() {
+        this.name = name
+        this.restaurantId = restaurantId
+        this.startFullTime = startTime
+        this.description = description
+        this.maxParticipant = maxParticipant
+        this.participant = participant
+        this.lobbyStatus = lobbyStatus
+
+        lobbyJson = JSONObject()
+
+        lobbyJson.put("restaurantId", restaurantId)
+        updateJson()
+    }
+
     fun toJson(): JSONObject {
         updateJson()
         return lobbyJson
@@ -48,9 +64,9 @@ class Lobby() {
 
     private fun updateJson() {
         val jsonArray = JSONArray(participant)
+        lobbyJson.put("startTime", startFullTime)
         lobbyJson.put("participant", jsonArray)
         lobbyJson.put("lobbyName", name)
-        lobbyJson.put("startTime", startFullTime)
         lobbyJson.put("description", description)
         lobbyJson.put("maxParticipant", maxParticipant)
         lobbyJson.put("lobbyStatus", lobbyStatus)

@@ -72,7 +72,6 @@ class NearbyFragment : Fragment() {
 
     private fun createLobbyCardLayout() {
         val lobbyJson = nearbyViewModel.getLobbyDetail().value!! // guarantee not null by load status
-        println(lobbyJson.toString())
 
         val contentLayout = requireActivity().findViewById<LinearLayout>(R.id.lobby_linear_layout_view)
         contentLayout.removeAllViews()

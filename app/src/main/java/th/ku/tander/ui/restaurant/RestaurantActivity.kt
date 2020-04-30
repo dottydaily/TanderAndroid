@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_restaurant.*
@@ -50,8 +51,8 @@ class RestaurantActivity : AppCompatActivity() {
             if (it != null) restaurantViewModel.fetchRestaurantImage()
         })
 
-        restaurantViewModel.image.observe(this, Observer {
-            if (it != null) updateUiData()
+        restaurantViewModel.isDoneLoaded.observe(this, Observer { isDone ->
+            if (isDone) updateUiData()
         })
     }
 
@@ -111,14 +112,27 @@ class RestaurantActivity : AppCompatActivity() {
 
     private fun handleCreateButton() {
         restaurant_create_button.setOnClickListener {
-            val intent = Intent(this, CreateLobbyActivity::class.java)
+            restaurantViewModel.checkIfAlreadyCreateLobby()
 
-            restaurantViewModel.restaurant.apply {
-                if (value != null) {
-                    intent.putExtra("restaurantJson", value!!.toJson().toString())
-                    startActivity(intent)
+            restaurantViewModel.didCreateAnotherBefore.observe(
+                this, Observer { didCreate ->
+                    if (didCreate != null) {
+                        if (didCreate) {  // don't create
+                            Toast.makeText(this, "You already have another lobby!",
+                                Toast.LENGTH_SHORT).show()
+                        } else { // do create a new lobby
+                            val intent = Intent(this, CreateLobbyActivity::class.java)
+
+                            restaurantViewModel.restaurant.apply {
+                                if (value != null) {
+                                    intent.putExtra("restaurantJson", value!!.toJson().toString())
+                                    startActivity(intent)
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+            )
         }
     }
 }

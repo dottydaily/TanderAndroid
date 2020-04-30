@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_lobby.*
@@ -17,11 +18,13 @@ import th.ku.tander.ui.view_class.ParticipantLayout
 class LobbyActivity : AppCompatActivity() {
 
     private val lobbyViewModel by viewModels<LobbyViewModel>()
+    private var isFromCreatePage: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
 
+        isFromCreatePage = intent.getBooleanExtra("fromCreate", false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Lobby"
     }
@@ -141,11 +144,21 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun leaveLobby() {
         lobby_room_loading_spinner.visibility = View.VISIBLE
+
         val username = KeyStoreManager.getData("USER")
         username.let { lobbyViewModel.removeFromLobby(it!!) }
-        lobbyViewModel.getQuitStatus().observe(this, Observer { isQuit ->
-            if (isQuit) {
-                finish()
+
+        lobbyViewModel.getQuitStatus().observe(this, Observer { status ->
+            if (status != null) { // quit this lobby
+                println("QUIT LOBBY : $status")
+
+                if (status == "DELETE") { // delete lobby, prompt user
+                    Toast.makeText(this, "Lobby Deleted.", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else if (status == "QUIT") { // quit loby, prompt user
+                    Toast.makeText(this, "Quited Lobby.", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
         })
     }

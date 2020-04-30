@@ -28,30 +28,46 @@
                 android:gravity="end"
                 android:layout_gravity="end"
                 android:orientation="vertical">
-                <TextView
-                    android:id="@+id/lobby_room_lobby_title"
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="Lobby's Title"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimary"
-                    android:textAlignment="viewEnd" />
+                    android:orientation="vertical"
+                    android:layout_gravity="end">
+                    <TextView
+                        android:id="@+id/lobby_room_lobby_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="Lobby's Title"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:textAlignment="viewEnd" />
+                </LinearLayout>
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginVertical="5dp"
                     android:background="@android:color/darker_gray"/>
-                <TextView
-                    android:id="@+id/lobby_room_restaurant_title"
-                    android:layout_width="match_parent"
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="Restaurant's Name"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textAlignment="viewEnd" />
+                    android:orientation="vertical"
+                    android:layout_gravity="end">
+
+                    <TextView
+                        android:id="@+id/lobby_room_restaurant_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="Restaurant's Name"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textAlignment="viewEnd" />
+                </LinearLayout>
             </LinearLayout>
             <TextView
 
