@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import com.android.volley.Response
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.android.synthetic.main.activity_splash.*
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
@@ -23,6 +24,7 @@ class SplashActivity : AppCompatActivity() {
 
         KeyStoreManager.start(applicationContext)
         RequestManager.start(applicationContext)
+        splash_loading_text_view.text = "Getting location..."
 
         print("========== Requesting Location Permissions ==========")
         LocationRequester.start(this)
@@ -53,13 +55,13 @@ class SplashActivity : AppCompatActivity() {
     ///////////////////
 
     fun checkLogin() {
-        println("Checking login")
 //        KeyStoreManager.clearAll()
 
         val name = KeyStoreManager.getData("USER")
         val token = KeyStoreManager.getData("TOKEN")
 
         if (name != null && token != null) {
+            splash_loading_text_view.text = "Logging in..."
             RequestManager.verifyToken(name, token,
                 Response.Listener {
                     val isVerify = it.toBoolean()

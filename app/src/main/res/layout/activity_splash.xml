@@ -30,5 +30,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/splash_image" />
 
+    <TextView
+        android:id="@+id/splash_loading_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="@string/splash_loading_text_view_text"
+        app:layout_constraintBottom_toTopOf="@id/loading_progessbar_splash"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,9 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".ui.lobby.LobbyActivity"
-            android:parentActivityName=".MainActivity"/>
+        <activity android:name=".ui.lobby.CreateLobbyActivity"></activity>
+        <activity android:name=".ui.restaurant.RestaurantActivity" />
+        <activity android:name=".ui.lobby.LobbyActivity" />
         <activity
             android:name=".ui.login.SignUpActivity"
             android:parentActivityName=".ui.login.LogInActivity"
@@ -23,12 +23,8 @@
         <activity
             android:name=".ui.login.LogInActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.search.CategoryActivity"
-            android:parentActivityName=".ui.search.SearchFilterActivity" />
-        <activity
-            android:name=".ui.search.SearchFilterActivity"
-            android:parentActivityName=".ui.search.SearchActivity" />
+        <activity android:name=".ui.search.CategoryActivity" />
+        <activity android:name=".ui.search.SearchFilterActivity" />
         <activity
             android:name=".ui.search.SearchActivity"
             android:parentActivityName=".MainActivity"

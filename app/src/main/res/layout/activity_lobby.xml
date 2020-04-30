@@ -7,6 +7,7 @@
     tools:context=".ui.lobby.LobbyActivity">
 
     <ScrollView
+        android:id="@+id/lobby_room_content_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"

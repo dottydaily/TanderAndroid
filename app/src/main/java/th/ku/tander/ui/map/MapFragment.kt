@@ -11,6 +11,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.json.JSONArray
+import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
@@ -30,94 +33,79 @@ import th.ku.tander.ui.search.SearchActivity
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
+    private val mapViewModel by viewModels<MapViewModel>()
     private var mMap: GoogleMap? = null
-    private var currentLocation: LatLng? = null
     private lateinit var mapFragment: SupportMapFragment
-    private var restaurants: JSONArray? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        println("On CreateView")
+        println("========== CREATE: MAP FRAGMENT =========")
 
         // inflate an view
         val view = inflater.inflate(R.layout.fragment_map, container, false)
 
-        // handle searchbar action
-//        val searchBar = view.findViewById<EditText>(R.id.search_bar)
-//        handleSearchBarBehavior()
-
         // implement google map fragment
         mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
+
         mapFragment.retainInstance = true
         mapFragment.getMapAsync(this)
 
-        // hide map fragment if don't have restaurant yet
-        if (restaurants == null) {
-            revealFragment(mapFragment, false)
+        if (savedInstanceState != null) {
+            println("========== RESTORE STATE: MAP FRAGMENT ==========")
+            savedInstanceState.let {
+                val lat = it.getDouble("lat")
+                val lon = it.getDouble("lon")
+
+                mapViewModel.currentLocation.value = LatLng(lat, lon)
+
+                val jsonString = it.getString("restaurants")
+                mapViewModel.applyRestaurantJson(JSONArray(jsonString))
+            }
+
+        } else {
+            LocationRequester.getLiveLocation().observe(viewLifecycleOwner, Observer {
+                if (it != null) mapViewModel.currentLocation.value = it
+            })
         }
 
-        currentLocation = LocationRequester.getLocation()
+        // hide map fragment if don't have restaurant yet
+        if (mapViewModel.getRestaurantMap().value == null) {
+            revealFragment(mapFragment, false)
+        }
 
         return view
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        println("========== MAP READY: MAP FRAGMENT ==========")
+        mMap = googleMap
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        println("========== START: MAP FRAGMENT ==========")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // check location, then do fetch restaurant
+        mapViewModel.currentLocation.observe(viewLifecycleOwner, Observer {
+            if (it != null) mapViewModel.fetchRestaurants()
+        })
+
+        // check if done loading, then set data on map
+        mapViewModel.getRestaurantMap().observe(viewLifecycleOwner, Observer {
+            if (it != null) setDataOnMap(it)
+        })
+
+        println("========== RESUME: MAP FRAGMENT ==========")
         handleSearchBarBehavior()
-
-        if (restaurants == null) {
-            mMap = googleMap
-
-            // request
-            val url = "https://tander-webservice.an.r.appspot.com/restaurants/search/" +
-                    "?lat=${currentLocation?.latitude}&lon=${currentLocation?.longitude}"
-            println(url)
-            val restaurantRequest = JsonArrayRequest(
-                Request.Method.GET, url, null,
-                Response.Listener { response ->
-                    println("========== Got response! ==========")
-
-                    // parse all restaurants into arraylist
-//                    restaurants = JSONParser.fromJSONArraytoRestaurantArray(response.toString())
-
-                    setDataOnMap(response)
-                },
-                Response.ErrorListener { error ->
-                    println(error.message)
-                }
-            )
-            restaurantRequest.setRetryPolicy(
-                DefaultRetryPolicy(
-                5000, 3, 1.0F
-            )
-            )
-
-            RequestManager.add(restaurantRequest)
-//            RequestManager.startRequest()
-        } else {
-            Handler().postDelayed( {
-                setDataOnMap(restaurants!!)
-            }, 3000)
-        }
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapFragment.onSaveInstanceState(outState)
-    }
-
-//    override fun onResume() {
-//        super.onResume()
-//
-//        println("On Resume")
-//
-//        if (mMap != null) {
-//            println("Reloading map fragment ${restaurants?.length()}")
-//            search_bar.visibility = View.VISIBLE
-//        }
-//    }
 
     override fun onPause() {
         super.onPause()
@@ -125,22 +113,38 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         println("========== PAUSE : MAP FRAGMENT ==========")
     }
 
+    override fun onStop() {
+        super.onStop()
+
+        println("========== STOP : MAP FRAGMENT ==========")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        println("========= ON SAVE INSTANCE : MAP FRAGMENT ==========")
+
+        outState.run {
+            putDouble("lat", mapViewModel.currentLocation.value!!.latitude)
+            putDouble("lon", mapViewModel.currentLocation.value!!.longitude)
+            putString("restaurants", mapViewModel.restaurantJsonString)
+        }
+        mapFragment.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
     ///////////////////
     // helper method //
     ///////////////////
 
-    private fun setDataOnMap(jsonArray: JSONArray) {
-        // save the response result
-        restaurants = jsonArray
+    private fun setDataOnMap(restaurantMap: HashMap<String, JSONObject>) {
 
         // showing map fragment and remove spinner
         revealFragment(mapFragment, true)
         loading_spinner_map.visibility = View.INVISIBLE
         search_bar.visibility = View.VISIBLE
 
-//        restaurants.forEach {
-        for (i in 0 until jsonArray.length()) {
-            val restaurant = jsonArray.getJSONObject(i)
+        restaurantMap.map {
+            val restaurant = it.value
+
             val position = restaurant.getJSONObject("position")
             val lat = position.getDouble("lat")
             val lon = position.getDouble("lon")
@@ -150,8 +154,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             mMap?.addMarker(MarkerOptions().position(LatLng(lat, lon)).title(title))
         }
 
-        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16.0f))
-        Toast.makeText(context, "Found: ${restaurants?.length()} restaurants", Toast.LENGTH_SHORT).show()
+        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(mapViewModel.currentLocation.value, 16.0f))
+        Toast.makeText(context,
+            "Found: ${mapViewModel.totalRestaurant} restaurants",
+            Toast.LENGTH_SHORT).show()
     }
 
     // show/hide mapfragment
@@ -167,16 +173,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         fragmentTransaction.commit()
     }
 
-    private fun hideKeyboard(context: Context, editText: EditText) {
-        val imm = context as InputMethodManager
-        imm.hideSoftInputFromWindow(editText.windowToken, 0)
-    }
-
     private fun handleSearchBarBehavior() {
-        search_bar.setOnClickListener {
+        this.search_bar.setOnClickListener {
             println("Launching Search Activity")
             val intent = Intent(requireContext(), SearchActivity::class.java)
-            intent.putExtra("EXTRA_LOCATION", currentLocation!!)
 
             startActivity(intent)
         }

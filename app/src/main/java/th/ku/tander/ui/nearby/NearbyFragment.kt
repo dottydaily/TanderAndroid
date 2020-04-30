@@ -8,7 +8,9 @@ import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import kotlinx.android.synthetic.main.activity_lobby.*
 import kotlinx.android.synthetic.main.fragment_nearby.*
+import kotlinx.android.synthetic.main.lobby_card_view.*
 import th.ku.tander.R
 import th.ku.tander.ui.promotion.NearbyViewModel
 import th.ku.tander.ui.view_class.LobbyCardLayout
@@ -35,6 +37,8 @@ class NearbyFragment : Fragment() {
         super.onResume()
 
         println("========== RESUME: NearbyLobby ==========")
+
+        lobby_scroll_view.visibility = View.INVISIBLE
 
         nearbyViewModel.fetchLobby()
         nearbyViewModel.getStatus().observe(viewLifecycleOwner, Observer { isDone ->
@@ -89,6 +93,8 @@ class NearbyFragment : Fragment() {
 
             contentLayout.addView(lobbyCardLayout)
         }
+
+        lobby_scroll_view.visibility = View.VISIBLE
 
         val spinner = requireActivity().loading_spinner_nearby
         spinner.visibility = View.GONE

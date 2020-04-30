@@ -31,7 +31,7 @@ class CategoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_category)
 
         supportActionBar?.title = "Select Restaurant Type"
-        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         setClearButtonBehavior()
         setSelectButtonBehavior()
@@ -65,6 +65,10 @@ class CategoryActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
         android.R.id.home -> {
+            val intent = Intent()
+            intent.putExtra("category", previousCategory)
+            setResult(Activity.RESULT_OK, intent)
+
             finish()
             true
         }
@@ -108,8 +112,6 @@ class CategoryActivity : AppCompatActivity() {
 
                 // hiding spinner
                 loading_spinner_category.visibility = View.INVISIBLE
-                Toast.makeText(this, "${response.length()} availables.",
-                    Toast.LENGTH_SHORT).show()
             }, Response.ErrorListener { error ->
                 println(error.message)
             })

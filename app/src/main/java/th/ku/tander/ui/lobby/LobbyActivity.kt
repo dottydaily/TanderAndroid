@@ -22,7 +22,7 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
 
-        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Lobby"
     }
 
@@ -36,6 +36,8 @@ class LobbyActivity : AppCompatActivity() {
         super.onResume()
 
         println("========== RESUME: LOBBY ==========")
+
+        lobby_room_content_layout.visibility = View.GONE
 
         val lobbyJsonString = intent.getStringExtra("lobbyJsonString")
         val restaurantJsonString = intent.getStringExtra("restaurantJsonString")
@@ -72,12 +74,17 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
+    ///////////////////
+    // helper method //
+    ///////////////////
+
     // get lobby detail from viewModel and update it to UI
     private fun updateLobbyRoomData() {
         val lobby = lobbyViewModel.getLobbyJson().value!!
         val restaurant = lobbyViewModel.getRestaurantJson().value!!
 
         lobby_room_lobby_title.text = lobby.name
+        lobby_room_lobby_title.isSelected = true
         lobby_room_restaurant_title.text = restaurant.name
         lobby_room_description_text_view.text = lobby.description
 
@@ -129,6 +136,7 @@ class LobbyActivity : AppCompatActivity() {
         }
 
         lobby_room_loading_spinner.visibility = View.INVISIBLE
+        lobby_room_content_layout.visibility = View.VISIBLE
     }
 
     private fun leaveLobby() {

@@ -43,4 +43,5 @@
     <string name="lobby_room_button_participant_leave_text">Leave Group</string>
     <string name="lobby_room_button_owner_edit_text">Edit Lobby</string>
     <string name="lobby_room_button_owner_main_text">Start Eating</string>
+    <string name="splash_loading_text_view_text">LOADING...</string>
 </resources>

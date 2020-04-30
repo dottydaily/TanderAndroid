@@ -103,21 +103,6 @@ object LocationRequester {
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
-//    // handle after permissions had granted
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == 2) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                val toast = Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT)
-//                toast.show()
-//            }
-//        }
-//    }
-
     // request location data if our location record is null
     fun requestNewLocationData() {
         var requestOption = LocationRequest()

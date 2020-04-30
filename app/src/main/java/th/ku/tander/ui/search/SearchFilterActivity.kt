@@ -25,6 +25,7 @@ class SearchFilterActivity : AppCompatActivity() {
 
         this.keyword = intent.getStringExtra("keyword")
         supportActionBar?.title = "Filter by Detail"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         setSeekBarBehavior()
         setCategoryButton()
