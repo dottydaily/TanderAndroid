@@ -13,6 +13,7 @@ class CreateLobbyViewModel: ViewModel() {
     var restaurant = MutableLiveData<Restaurant>().apply { value = null }; private set
     var lobby = MutableLiveData<Lobby>().apply { value = null }; private set
     var participantCount = MutableLiveData<Int>().apply { value = 2 }
+    var deleteStatus = MutableLiveData<Boolean>().apply { value = false }
     var isEditMode = false
     val maxLengthName = 30
     var minParticipant = 2
@@ -61,6 +62,23 @@ class CreateLobbyViewModel: ViewModel() {
                 }
             },
             Response.ErrorListener { error ->
+                error.printStackTrace()
+            }, 3000, 3, 2f
+        )
+    }
+
+    fun deleteLobby() {
+        var url = "https://tander-webservice.an.r.appspot.com/lobbies/id/"
+        lobby.apply {
+            url += "${value!!.lobbyId}"
+        }
+
+        RequestManager.deleteRequestWithToken(url,
+            Response.Listener {
+                println("Deleted this lobby. ${lobby.value?.name}")
+
+                deleteStatus.value = true
+            }, Response.ErrorListener { error ->
                 error.printStackTrace()
             }, 3000, 3, 2f
         )

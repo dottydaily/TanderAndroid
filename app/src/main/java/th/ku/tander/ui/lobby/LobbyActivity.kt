@@ -39,8 +39,6 @@ class LobbyActivity : AppCompatActivity() {
 
         lobbyJsonString.let { lobbyViewModel.setLobbyJson(it) }
         restaurantJsonString.let { lobbyViewModel.setRestaurantJson(it) }
-
-        startSocketUpdateListener()
     }
 
     override fun onStart() {
@@ -53,6 +51,7 @@ class LobbyActivity : AppCompatActivity() {
         super.onResume()
 
         println("========== RESUME: LOBBY ==========")
+        startSocketUpdateListener()
 
         lobby_room_content_layout.visibility = View.GONE
 
@@ -76,7 +75,7 @@ class LobbyActivity : AppCompatActivity() {
                         finish()
                     }
                     "EDIT" -> {  // edit lobby, only get this status when press edit
-                        lobbyViewModel.clearQuitStatus()
+//                        lobbyViewModel.clearQuitStatus()
 
                         val intent = Intent(this, CreateLobbyActivity::class.java)
                         lobbyViewModel.getLobbyJson().run {
@@ -90,6 +89,7 @@ class LobbyActivity : AppCompatActivity() {
                         lobby_room_loading_spinner.visibility = View.GONE
 
                         println("\nQUIT: ${lobbyViewModel.getQuitStatus().value}\n")
+                        lobbyViewModel.clearAllObserver(this)
                         startActivityForResult(intent, EDIT_LOBBY_REQUEST_CODE)
                     }
                 }
@@ -105,13 +105,13 @@ class LobbyActivity : AppCompatActivity() {
         super.onPause()
 
         println("========== PAUSE: LOBBY ==========")
+        removeSocketUpdateListener()
     }
 
     override fun onStop() {
         super.onStop()
 
         println("========== STOP: LOBBY ==========")
-        removeSocketUpdateListener()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item.itemId) {
@@ -135,8 +135,16 @@ class LobbyActivity : AppCompatActivity() {
         // do fetch new lobby if come from edit page
         if (requestCode == EDIT_LOBBY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                Toast.makeText(this, "Edit successful", Toast.LENGTH_SHORT).show()
-                lobbyViewModel.updateLobby()
+
+                val isDeleted = data?.getBooleanExtra("isDeleted", false)
+
+                if (isDeleted != null && isDeleted == true) {
+                    println("========= LOBBY: SET DELETE STATUS =========")
+                    lobbyViewModel.setDeleteStatus()
+                } else {
+                    Toast.makeText(this, "Edit successful", Toast.LENGTH_SHORT).show()
+                    lobbyViewModel.updateLobby()
+                }
             }
         }
     }
@@ -258,8 +266,11 @@ class LobbyActivity : AppCompatActivity() {
     private fun startSocketUpdateListener() {
         SocketManager.hasUpdate.observe(this, Observer {
             if (lobbyViewModel.isLobbyExist()) {
+                println("========= DO UPDATE =========")
                 lobbyViewModel.updateLobby()
+                lobbyViewModel.clearQuitStatus()
             } else {
+                println("========= DO QUIT =========")
                 Toast.makeText(this,
                     "Finish Eating.\nThanks for joining me!", Toast.LENGTH_SHORT).show()
                 finish()

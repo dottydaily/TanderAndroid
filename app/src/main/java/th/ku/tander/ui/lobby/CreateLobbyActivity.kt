@@ -93,6 +93,15 @@ class CreateLobbyActivity : AppCompatActivity() {
         createLobbyViewModel.participantCount.observe(this, Observer {
             lobby_create_participant_number_text_view.text = it.toString()
         })
+
+        createLobbyViewModel.deleteStatus.observe(this, Observer {  isDeleted ->
+            if (isDeleted) {
+                val intent = Intent()
+                intent.putExtra("isDeleted", true)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
+        })
     }
 
     override fun onPause() {
@@ -240,7 +249,7 @@ class CreateLobbyActivity : AppCompatActivity() {
 
     private fun handleDeleteButtonBehavior() {
         lobby_create_delete_button.setOnClickListener {
-            // TODO: Implement delete
+            createLobbyViewModel.deleteLobby()
         }
     }
 

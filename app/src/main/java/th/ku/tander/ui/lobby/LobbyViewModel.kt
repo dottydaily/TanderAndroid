@@ -1,5 +1,6 @@
 package th.ku.tander.ui.lobby
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,8 +28,21 @@ class LobbyViewModel: ViewModel() {
     fun clearQuitStatus() {
         quitStatus.value = null
     }
+    fun setDeleteStatus() {
+        quitStatus.value = "DELETE"
+    }
     fun getLobbyEatingStatus(): String = lobby.value!!.lobbyStatus
-    fun isLobbyExist(): Boolean = quitStatus.value != "DELETE"
+    fun isLobbyExist(): Boolean {
+        println("========== Check is Lobby exist: ${quitStatus.value}")
+
+        if (quitStatus.value != "DELETE") {
+            println("========== LOBBY EXIST ==========")
+            return true
+        } else {
+            println("========== LOBBY DID NOT EXIST ==========")
+            return false
+        }
+    }
 
     fun setRestaurantJson(jsonString: String) {
         val json = JSONObject(jsonString)
@@ -131,7 +145,7 @@ class LobbyViewModel: ViewModel() {
                     lobby.apply { value = Lobby(it.getJSONObject(0)) }
 
                     if(isForEdit) {
-                        quitStatus.postValue("EDIT")
+                        quitStatus.value = "EDIT"
                     }
                 } else {
                     println("Lobby not found. host = ${lobby.value?.hostUsername}")
@@ -141,5 +155,10 @@ class LobbyViewModel: ViewModel() {
                 error.printStackTrace()
             }, 3000, 3, 2f
         )
+    }
+
+    fun clearAllObserver(owner: LifecycleOwner) {
+        quitStatus.removeObservers(owner)
+        doneStatus.removeObservers(owner)
     }
 }
