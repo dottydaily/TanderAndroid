@@ -57,6 +57,32 @@ object RequestManager {
         )
     }
 
+    fun getJsonObjectRequestWithToken(url: String, listener: Response.Listener<JSONObject>,
+                                      errorListener: Response.ErrorListener,
+                                      retryTime: Int, retryCount: Int, retryBackoff: Float) {
+        println("GET JSON OBJECT: $url")
+
+        val jsonObjectRequest = object: JsonObjectRequest(Method.GET, url, null,
+            listener, errorListener
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                if (token.isNullOrBlank()) {
+                    return super.getHeaders()
+                } else {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer ${token!!}"
+                    return headers
+                }
+            }
+        }
+
+        jsonObjectRequest.setRetryPolicy(
+            DefaultRetryPolicy(retryTime, retryCount, retryBackoff)
+        )
+
+        requestQueue?.add(jsonObjectRequest)
+    }
+
     fun getJsonArrayRequestWithToken(url: String, listener: Response.Listener<JSONArray>,
                             errorListener: Response.ErrorListener,
                             retryTime: Int, retryCount: Int, retryBackoff: Float) {

@@ -52,7 +52,7 @@ class SignUpActivity : AppCompatActivity() {
         super.onResume()
 
         println("========== SIGNUP PAGE ==========")
-        autoFillForDebug()
+//        autoFillForDebug()
     }
 
     override fun onPause() {
