@@ -5,14 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import th.ku.tander.R
 import th.ku.tander.helper.SocketManager
-import th.ku.tander.helper.SocketManager.liveUpdate
 import th.ku.tander.ui.promotion.NearbyViewModel
 import th.ku.tander.ui.view_class.LobbyCardLayout
 
@@ -25,7 +23,7 @@ class NearbyFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-//        SocketManager.start()
+        startSocketUpdateListener()
         return inflater.inflate(R.layout.fragment_nearby, container, false)
     }
 
@@ -46,9 +44,6 @@ class NearbyFragment : Fragment() {
         nearbyViewModel.status.observe(viewLifecycleOwner, Observer { isDone ->
             if (isDone) {
                 createLobbyCardLayout()
-            } else {
-                lobby_scroll_view.visibility = View.GONE
-                loading_spinner_nearby.visibility = View.VISIBLE
             }
         })
     }
@@ -63,7 +58,7 @@ class NearbyFragment : Fragment() {
         super.onStop()
 
         println("========== STOP: NearbyLobby ==========")
-        SocketManager.clearObserver(this)
+        removeSocketUpdateListener()
     }
 
     override fun onDestroy() {
@@ -77,7 +72,8 @@ class NearbyFragment : Fragment() {
     ///////////////////
 
     private fun createLobbyCardLayout() {
-        val lobbyJson = nearbyViewModel.getLobbyDetail().value!! // guarantee not null by load status
+        val lobbyJson = nearbyViewModel.getLobbyDetail()
+        println(lobbyJson)
 
         val contentLayout = requireActivity().findViewById<LinearLayout>(R.id.lobby_linear_layout_view)
         contentLayout.removeAllViews()
@@ -103,12 +99,21 @@ class NearbyFragment : Fragment() {
 
         val spinner = requireActivity().loading_spinner_nearby
         spinner.visibility = View.GONE
+    }
 
-        SocketManager.socket.on("update all lobbies") {
-            println("========== HAS UPDATE =========")
+    private fun startSocketUpdateListener() {
+        // add listener to socket -> need to remove after it done
+        SocketManager.hasUpdate.observe(viewLifecycleOwner, Observer { status ->
+            if (status == "UPDATE") {
+                println("========== HAS UPDATE: NEARBY =========")
 
-            nearbyViewModel.status.postValue(false)
-            nearbyViewModel.fetchLobby()
-        }
+                nearbyViewModel.status.postValue(false)
+                nearbyViewModel.fetchLobby()
+            }
+        })
+    }
+
+    private fun removeSocketUpdateListener() {
+        SocketManager.hasUpdate.removeObservers(this)
     }
 }

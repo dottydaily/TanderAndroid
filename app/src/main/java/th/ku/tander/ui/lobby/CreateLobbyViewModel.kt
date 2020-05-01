@@ -57,8 +57,12 @@ class CreateLobbyViewModel: ViewModel() {
 
         RequestManager.getJsonArrayRequestWithToken(url,
             Response.Listener {
-                println(it.getJSONObject(0))
-                lobby.apply { value = Lobby(it.getJSONObject(0)) }
+                if (it.length() != 0) {
+                    println(it.getJSONObject(0))
+                    lobby.apply { value = Lobby(it.getJSONObject(0)) }
+                } else {
+                    println("Lobby not found. host = ${lobby.value?.hostUsername}")
+                }
             },
             Response.ErrorListener { error ->
                 error.printStackTrace()

@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_lobby.*
 import th.ku.tander.R
 import th.ku.tander.helper.KeyStoreManager
+import th.ku.tander.helper.SocketManager
 import th.ku.tander.ui.view_class.ParticipantLayout
 
 class LobbyActivity : AppCompatActivity() {
@@ -27,6 +28,14 @@ class LobbyActivity : AppCompatActivity() {
         isFromCreatePage = intent.getBooleanExtra("fromCreate", false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Lobby"
+
+        val lobbyJsonString = intent.getStringExtra("lobbyJsonString")
+        val restaurantJsonString = intent.getStringExtra("restaurantJsonString")
+
+        lobbyJsonString.let { lobbyViewModel.setLobbyJson(it) }
+        restaurantJsonString.let { lobbyViewModel.setRestaurantJson(it) }
+
+        startSocketUpdateListener()
     }
 
     override fun onStart() {
@@ -42,17 +51,28 @@ class LobbyActivity : AppCompatActivity() {
 
         lobby_room_content_layout.visibility = View.GONE
 
-        val lobbyJsonString = intent.getStringExtra("lobbyJsonString")
-        val restaurantJsonString = intent.getStringExtra("restaurantJsonString")
-
-        lobbyJsonString.let { lobbyViewModel.setLobbyJson(it) }
-        restaurantJsonString.let { lobbyViewModel.setRestaurantJson(it) }
-
         lobbyViewModel.getDoneStatus().observe(this, Observer { isDone ->
             if (isDone) {
                 updateLobbyRoomData()
             }
         })
+
+        lobbyViewModel.getQuitStatus().observe(this, Observer { status ->
+            if (status != null) { // quit this lobby
+                println("QUIT LOBBY : $status")
+
+                if (status == "DELETE") { // delete lobby, prompt user
+                    Toast.makeText(this, "Lobby Deleted.", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else if (status == "QUIT") { // quit loby, prompt user
+                    Toast.makeText(this, "Quited Lobby.", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        })
+
+        handleMainButtonBehavior()
+        handleLeaveButtonBehavior()
     }
 
     override fun onPause() {
@@ -65,11 +85,17 @@ class LobbyActivity : AppCompatActivity() {
         super.onStop()
 
         println("========== STOP: LOBBY ==========")
+        removeSocketUpdateListener()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item.itemId) {
         android.R.id.home -> {
-            leaveLobby()
+            if (lobbyViewModel.getLobbyEatingStatus() == "waiting") {
+                leaveLobby()
+            } else {
+                finish()
+            }
+
             false
         }
         else -> {
@@ -128,13 +154,21 @@ class LobbyActivity : AppCompatActivity() {
 
         lobby_room_start_time_text_view.text = "Start at ${lobby.startTime}"
 
+        // show/hide button
         if (isOwner(lobby.hostUsername)) {
-            lobby_room_button_participant_layout.visibility = View.GONE
-        } else {
-            lobby_room_button_owner_layout.visibility = View.GONE
+            lobby_room_button_participant_leave.visibility = View.GONE
 
-            lobby_room_button_participant_leave.setOnClickListener {
-                leaveLobby()
+            if (lobbyViewModel.getLobbyEatingStatus() == "eating") {
+                lobby_room_button_owner_main.text = "Finish eating"
+                lobby_room_button_owner_edit.visibility = View.GONE
+            }
+        } else {
+            lobby_room_button_owner_main.visibility = View.GONE
+            lobby_room_button_owner_edit.visibility = View.GONE
+
+            if (lobbyViewModel.getLobbyEatingStatus() == "eating") {
+                lobby_room_button_participant_leave.setTextColor(Color.GRAY)
+                lobby_room_button_participant_leave.isClickable = false
             }
         }
 
@@ -142,25 +176,36 @@ class LobbyActivity : AppCompatActivity() {
         lobby_room_content_layout.visibility = View.VISIBLE
     }
 
+    private fun handleMainButtonBehavior() {
+        lobby_room_button_owner_main.setOnClickListener {
+            if (lobbyViewModel.getLobbyEatingStatus() == "waiting") {
+                lobbyViewModel.startEating()
+            } else if (lobbyViewModel.getLobbyEatingStatus() == "eating") {
+                lobbyViewModel.deleteLobby()
+                Toast.makeText(this,
+                    "Finish Eating.\nThanks for joining me!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+
+    private fun handleEditButtonBehavior() {
+        lobby_room_button_owner_edit.setOnClickListener {
+
+        }
+    }
+
+    private fun handleLeaveButtonBehavior() {
+        lobby_room_button_participant_leave.setOnClickListener {
+            leaveLobby()
+        }
+    }
+
     private fun leaveLobby() {
         lobby_room_loading_spinner.visibility = View.VISIBLE
 
         val username = KeyStoreManager.getData("USER")
         username.let { lobbyViewModel.removeFromLobby(it!!) }
-
-        lobbyViewModel.getQuitStatus().observe(this, Observer { status ->
-            if (status != null) { // quit this lobby
-                println("QUIT LOBBY : $status")
-
-                if (status == "DELETE") { // delete lobby, prompt user
-                    Toast.makeText(this, "Lobby Deleted.", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else if (status == "QUIT") { // quit loby, prompt user
-                    Toast.makeText(this, "Quited Lobby.", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
-        })
     }
 
     private fun isOwner(ownerName: String): Boolean {
@@ -169,5 +214,21 @@ class LobbyActivity : AppCompatActivity() {
 
         println("Check $username == $ownerName, Result is ${username == ownerName}")
         return username == ownerName
+    }
+
+    private fun startSocketUpdateListener() {
+        SocketManager.hasUpdate.observe(this, Observer {
+            if (lobbyViewModel.isLobbyExist()) {
+                lobbyViewModel.updateLobby()
+            } else {
+                Toast.makeText(this,
+                    "Finish Eating.\nThanks for joining me!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        })
+    }
+
+    private fun removeSocketUpdateListener() {
+        SocketManager.hasUpdate.removeObservers(this)
     }
 }

@@ -15,9 +15,7 @@ import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
-import th.ku.tander.helper.SocketManager
 import th.ku.tander.model.Lobby
-import th.ku.tander.model.Restaurant
 import th.ku.tander.ui.lobby.LobbyActivity
 
 class LobbyCardLayout: FrameLayout {
@@ -148,40 +146,62 @@ class LobbyCardLayout: FrameLayout {
                 expandButton.setText(R.string.lobby_expand_button_text)
                 expandLayout.visibility = View.GONE
             }
-
-            Toast.makeText(this.context, "${SocketManager.socket.connected()}"
-                , Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setJoinButtonBehavior() {
         joinButton.setOnClickListener {
             if (isJoinable) {
-                val username = KeyStoreManager.getData("USER")
-
-                val lobby = Lobby(lobbyJson)
-                username.let {
-                    if (lobby.participant.contains(it)) {
-                        // skipping update because you are already in this lobby
-                        val lobbyPage = Intent(this.context, LobbyActivity::class.java)
-                        lobbyPage.putExtra("lobbyJsonString", lobbyJson.toString())
-                        lobbyPage.putExtra("restaurantJsonString", restaurantJson.toString())
-
-                        context.startActivity(lobbyPage)
-                        Toast.makeText(this.context, "Joined! : ${lobby.name}",
-                            Toast.LENGTH_SHORT).show()
-                    } else {
-                        lobby.participant.add(it!!)
-                        lobbyJson = lobby.toJson()
-
-                        sendLobbyUpdateToServer()
-                    }
-                }
+                getLobbyBeforeJoin()
             }
         }
     }
 
-    private fun sendLobbyUpdateToServer() {println(lobbyJson.toString())
+    private fun getLobbyBeforeJoin() {
+        val hostUsername = lobbyJson.getString("hostUsername")
+
+        val url = "https://tander-webservice.an.r.appspot.com/lobbies/users/$hostUsername"
+
+        RequestManager.getJsonArrayRequestWithToken(url,
+            Response.Listener {
+                if (it.length() != 0) { // already have lobby, get it, then update and send back
+                    lobbyJson = it.getJSONObject(0)
+                    updateLobbyDataBeforeSendToServer()
+                } else { // we gonna make a new lobby, just send update
+                    sendLobbyUpdateToServer()
+                }
+            },
+            Response.ErrorListener {
+
+            }, 3000, 3, 2f
+        )
+
+    }
+
+    private fun updateLobbyDataBeforeSendToServer() {
+        val lobby = Lobby(lobbyJson)
+        val username = KeyStoreManager.getData("USER")
+        username.let {
+            if (lobby.participant.contains(it)) {
+                // skipping update because you are already in this lobby
+                val lobbyPage = Intent(this.context, LobbyActivity::class.java)
+                lobbyPage.putExtra("lobbyJsonString", lobbyJson.toString())
+                lobbyPage.putExtra("restaurantJsonString", restaurantJson.toString())
+
+                context.startActivity(lobbyPage)
+                Toast.makeText(this.context, "Joined! : ${lobby.name}",
+                    Toast.LENGTH_SHORT).show()
+            } else {
+                lobby.participant.add(it!!)
+                lobbyJson = lobby.toJson()
+
+                sendLobbyUpdateToServer()
+            }
+        }
+    }
+
+    private fun sendLobbyUpdateToServer() {
+        println(lobbyJson.toString())
         println(restaurantJson.toString())
 
         currentActivity.loading_spinner_nearby.visibility = View.VISIBLE

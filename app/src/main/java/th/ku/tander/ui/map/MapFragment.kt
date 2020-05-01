@@ -68,6 +68,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         } else {
             LocationRequester.getLiveLocation().observe(viewLifecycleOwner, Observer {
                 if (it != null) mapViewModel.currentLocation.value = it
+                else LocationRequester.getLocation()
             })
         }
 
