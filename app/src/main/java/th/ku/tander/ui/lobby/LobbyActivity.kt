@@ -1,5 +1,7 @@
 package th.ku.tander.ui.lobby
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,13 +13,16 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_lobby.*
+import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.SocketManager
+import th.ku.tander.model.Lobby
 import th.ku.tander.ui.view_class.ParticipantLayout
 
 class LobbyActivity : AppCompatActivity() {
 
+    private val EDIT_LOBBY_REQUEST_CODE = 0
     private val lobbyViewModel by viewModels<LobbyViewModel>()
     private var isFromCreatePage: Boolean = false
 
@@ -61,17 +66,38 @@ class LobbyActivity : AppCompatActivity() {
             if (status != null) { // quit this lobby
                 println("QUIT LOBBY : $status")
 
-                if (status == "DELETE") { // delete lobby, prompt user
-                    Toast.makeText(this, "Lobby Deleted.", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else if (status == "QUIT") { // quit loby, prompt user
-                    Toast.makeText(this, "Quited Lobby.", Toast.LENGTH_SHORT).show()
-                    finish()
+                when (status) {
+                    "DELETE" -> { // delete lobby, prompt user
+                        Toast.makeText(this, "Lobby Deleted.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    "QUIT" -> { // quit lobby, prompt user
+                        Toast.makeText(this, "Quited Lobby.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    "EDIT" -> {  // edit lobby, only get this status when press edit
+                        lobbyViewModel.clearQuitStatus()
+
+                        val intent = Intent(this, CreateLobbyActivity::class.java)
+                        lobbyViewModel.getLobbyJson().run {
+                            intent.putExtra("lobbyJson", value!!.toJson().toString())
+                            intent.putExtra("isEdit", true)
+                        }
+                        lobbyViewModel.getRestaurantJson().run {
+                            intent.putExtra("restaurantJson", value!!.toJson().toString())
+                        }
+
+                        lobby_room_loading_spinner.visibility = View.GONE
+
+                        println("\nQUIT: ${lobbyViewModel.getQuitStatus().value}\n")
+                        startActivityForResult(intent, EDIT_LOBBY_REQUEST_CODE)
+                    }
                 }
             }
         })
 
         handleMainButtonBehavior()
+        handleEditButtonBehavior()
         handleLeaveButtonBehavior()
     }
 
@@ -100,6 +126,18 @@ class LobbyActivity : AppCompatActivity() {
         }
         else -> {
             false
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // do fetch new lobby if come from edit page
+        if (requestCode == EDIT_LOBBY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Toast.makeText(this, "Edit successful", Toast.LENGTH_SHORT).show()
+                lobbyViewModel.updateLobby()
+            }
         }
     }
 
@@ -191,7 +229,8 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun handleEditButtonBehavior() {
         lobby_room_button_owner_edit.setOnClickListener {
-
+            lobbyViewModel.fetchLobbyResult(isForEdit = true)
+            lobby_room_loading_spinner.visibility = View.VISIBLE
         }
     }
 

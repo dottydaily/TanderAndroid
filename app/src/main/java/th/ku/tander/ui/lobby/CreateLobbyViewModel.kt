@@ -3,6 +3,7 @@ package th.ku.tander.ui.lobby
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.volley.Response
+import org.json.JSONObject
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
 import th.ku.tander.model.Lobby
@@ -12,8 +13,9 @@ class CreateLobbyViewModel: ViewModel() {
     var restaurant = MutableLiveData<Restaurant>().apply { value = null }; private set
     var lobby = MutableLiveData<Lobby>().apply { value = null }; private set
     var participantCount = MutableLiveData<Int>().apply { value = 2 }
+    var isEditMode = false
     val maxLengthName = 30
-    val minParticipant = 2
+    var minParticipant = 2
     val maxParticipant = 10
     private var username: String = KeyStoreManager.getData("USER")!!
 
@@ -29,19 +31,13 @@ class CreateLobbyViewModel: ViewModel() {
         }
     }
 
-    fun createLobbyToDatabase(name: String, restaurantId: String, startTime: String,
-                              description: String, maxParticipant: Int, participant: HashSet<String>) {
-
-        val tempLobby = Lobby(name, restaurantId, startTime, description, maxParticipant,
-            participant, "waiting" )
-        tempLobby.participant.add(username)
-
-        val url = "https://tander-webservice.an.r.appspot.com/lobbies/restaurantId/$restaurantId"
-        val body = tempLobby.toJson()
+    fun sendLobbyToDatabase(lobby: Lobby) {
+        val url = "https://tander-webservice.an.r.appspot.com/lobbies/restaurantId/${lobby.restaurantId}"
+        val body = lobby.toJson()
 
         RequestManager.postRequestWithBody(url, body,
             Response.Listener { response ->
-                println(response)
+                println("\nUpdated: $response\n")
 
                 getLobbyResult()
             },

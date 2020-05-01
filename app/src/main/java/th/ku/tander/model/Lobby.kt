@@ -5,7 +5,7 @@ import org.json.JSONObject
 
 class Lobby() {
     lateinit var participant: HashSet<String>
-    lateinit var lobbyId: String
+    var lobbyId: String = ""
     lateinit var name: String
     lateinit var restaurantId: String
     lateinit var startFullTime: String
@@ -14,7 +14,7 @@ class Lobby() {
     lateinit var description: String
     var maxParticipant: Int = 0
     lateinit var lobbyStatus: String
-    lateinit var hostUsername: String
+    var hostUsername: String = ""
     private lateinit var lobbyJson: JSONObject
 
     init {
@@ -70,6 +70,14 @@ class Lobby() {
         lobbyJson.put("description", description)
         lobbyJson.put("maxParticipant", maxParticipant)
         lobbyJson.put("lobbyStatus", lobbyStatus)
+
+        if (!lobbyId.isBlank()) {
+            lobbyJson.put("_id", lobbyId)
+        }
+
+        if (!hostUsername.isBlank()) {
+            lobbyJson.put("hostUsername", hostUsername)
+        }
     }
 
     override fun toString(): String {

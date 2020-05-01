@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.volley.Response
 import org.json.JSONObject
-import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
 import th.ku.tander.model.Lobby
 import th.ku.tander.model.Restaurant
@@ -24,6 +23,9 @@ class LobbyViewModel: ViewModel() {
     fun getDoneStatus(): LiveData<Boolean> {
         doneStatus.value = hasRestaurant && hasLobby
         return doneStatus
+    }
+    fun clearQuitStatus() {
+        quitStatus.value = null
     }
     fun getLobbyEatingStatus(): String = lobby.value!!.lobbyStatus
     fun isLobbyExist(): Boolean = quitStatus.value != "DELETE"
@@ -48,8 +50,8 @@ class LobbyViewModel: ViewModel() {
             Response.Listener {
                 if (it.length() == 0) quitStatus.postValue("DELETE")
                 else {
-                    val newLobbyDetaii = Lobby(it.getJSONObject(0))
-                    lobby.postValue(newLobbyDetaii)
+                    val newLobbyDetail = Lobby(it.getJSONObject(0))
+                    lobby.postValue(newLobbyDetail)
                     doneStatus.postValue(true)
                 }
             },
@@ -70,7 +72,7 @@ class LobbyViewModel: ViewModel() {
                 Response.Listener { response ->
                     println(response)
 
-                    getLobbyResult()
+                    fetchLobbyResult()
                 },
                 Response.ErrorListener { error ->
                     error.printStackTrace()
@@ -119,7 +121,7 @@ class LobbyViewModel: ViewModel() {
         )
     }
 
-    private fun getLobbyResult() {
+    fun fetchLobbyResult(isForEdit: Boolean = false) {
         val url = "https://tander-webservice.an.r.appspot.com/lobbies/users/${lobby.value!!.hostUsername}"
 
         RequestManager.getJsonArrayRequestWithToken(url,
@@ -127,6 +129,10 @@ class LobbyViewModel: ViewModel() {
                 if (it.length() != 0) {
                     println(it.getJSONObject(0))
                     lobby.apply { value = Lobby(it.getJSONObject(0)) }
+
+                    if(isForEdit) {
+                        quitStatus.postValue("EDIT")
+                    }
                 } else {
                     println("Lobby not found. host = ${lobby.value?.hostUsername}")
                 }
