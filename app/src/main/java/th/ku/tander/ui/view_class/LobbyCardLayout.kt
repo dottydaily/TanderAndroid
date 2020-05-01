@@ -15,6 +15,7 @@ import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.RequestManager
+import th.ku.tander.helper.SocketManager
 import th.ku.tander.model.Lobby
 import th.ku.tander.model.Restaurant
 import th.ku.tander.ui.lobby.LobbyActivity
@@ -147,6 +148,9 @@ class LobbyCardLayout: FrameLayout {
                 expandButton.setText(R.string.lobby_expand_button_text)
                 expandLayout.visibility = View.GONE
             }
+
+            Toast.makeText(this.context, "${SocketManager.socket.connected()}"
+                , Toast.LENGTH_SHORT).show()
         }
     }
 

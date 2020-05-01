@@ -12,7 +12,7 @@ import th.ku.tander.model.Restaurant
 
 class NearbyViewModel : ViewModel() {
 
-    private var status = MutableLiveData<Boolean>().apply { value = false }
+    var status = MutableLiveData<Boolean>().apply { value = false }
     private var lobbyDetailArray = MutableLiveData<JSONArray>().apply { value = JSONArray() }
     private var restaurantIdSet: HashSet<String> = HashSet()
     private var restaurantMap: HashMap<String, Restaurant> = HashMap()
@@ -31,7 +31,7 @@ class NearbyViewModel : ViewModel() {
 
         RequestManager.getJsonArrayRequestWithToken(url,
             Response.Listener<JSONArray> { response ->
-                lobbyDetailArray.value = response
+                lobbyDetailArray.postValue(response)
 
                 // save all restaurantId by using set
                 for (i in 0 until response.length()) {
@@ -84,7 +84,7 @@ class NearbyViewModel : ViewModel() {
                 restaurantMap[restaurant.restaurantId] = restaurant
             }
 
-            status.value = true
+            status.postValue(true)
             println("DONE FETCHING RESTAURANT : ${jsonResponse.length()} restaurants")
         }
 
@@ -98,8 +98,8 @@ class NearbyViewModel : ViewModel() {
 
     // reset data before start fetching
     private fun clearCurrentData() {
-        status.value = false
-        lobbyDetailArray.value = JSONArray()
+        status.postValue(false)
+        lobbyDetailArray.postValue(JSONArray())
         restaurantIdSet = HashSet()
         restaurantMap = HashMap()
         joinedLobbyId = null

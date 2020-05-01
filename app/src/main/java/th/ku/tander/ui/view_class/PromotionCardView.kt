@@ -124,7 +124,7 @@ class PromotionCardView : CardView {
             )
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         } else {
-            imageView.setImageResource(R.drawable.ic_splash_logo)
+            imageView.setImageResource(R.drawable.default_image)
             imageView.imageAlpha = 200
             imageView.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT

@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.activity_splash.*
 import th.ku.tander.helper.KeyStoreManager
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
+import th.ku.tander.helper.SocketManager
 import th.ku.tander.ui.login.LogInActivity
 
 class SplashActivity : AppCompatActivity() {
@@ -24,6 +25,7 @@ class SplashActivity : AppCompatActivity() {
 
         KeyStoreManager.start(applicationContext)
         RequestManager.start(applicationContext)
+        SocketManager.start()
         splash_loading_text_view.text = "Getting location..."
 
         print("========== Requesting Location Permissions ==========")

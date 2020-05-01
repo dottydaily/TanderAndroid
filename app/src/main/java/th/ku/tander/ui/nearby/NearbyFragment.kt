@@ -5,13 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.activity_lobby.*
 import kotlinx.android.synthetic.main.fragment_nearby.*
-import kotlinx.android.synthetic.main.lobby_card_view.*
 import th.ku.tander.R
+import th.ku.tander.helper.SocketManager
+import th.ku.tander.helper.SocketManager.liveUpdate
 import th.ku.tander.ui.promotion.NearbyViewModel
 import th.ku.tander.ui.view_class.LobbyCardLayout
 
@@ -24,6 +25,7 @@ class NearbyFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+//        SocketManager.start()
         return inflater.inflate(R.layout.fragment_nearby, container, false)
     }
 
@@ -41,9 +43,12 @@ class NearbyFragment : Fragment() {
         lobby_scroll_view.visibility = View.INVISIBLE
 
         nearbyViewModel.fetchLobby()
-        nearbyViewModel.getStatus().observe(viewLifecycleOwner, Observer { isDone ->
+        nearbyViewModel.status.observe(viewLifecycleOwner, Observer { isDone ->
             if (isDone) {
                 createLobbyCardLayout()
+            } else {
+                lobby_scroll_view.visibility = View.GONE
+                loading_spinner_nearby.visibility = View.VISIBLE
             }
         })
     }
@@ -58,6 +63,7 @@ class NearbyFragment : Fragment() {
         super.onStop()
 
         println("========== STOP: NearbyLobby ==========")
+        SocketManager.clearObserver(this)
     }
 
     override fun onDestroy() {
@@ -97,5 +103,12 @@ class NearbyFragment : Fragment() {
 
         val spinner = requireActivity().loading_spinner_nearby
         spinner.visibility = View.GONE
+
+        SocketManager.socket.on("update all lobbies") {
+            println("========== HAS UPDATE =========")
+
+            nearbyViewModel.status.postValue(false)
+            nearbyViewModel.fetchLobby()
+        }
     }
 }

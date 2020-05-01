@@ -49,6 +49,7 @@ object RequestManager {
         map["token"] = token
 
         val body = JSONObject(map as Map<*, *>)
+//        val url = "http://192.168.1.102:9000/users/verify"
         val url = "https://tander-webservice.an.r.appspot.com/users/verify"
 
         postRequestWithBody(url, body,

@@ -22,7 +22,7 @@
                 android:id="@+id/restaurant_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="340dp"
-                android:background="@drawable/ic_splash_logo"
+                android:background="@drawable/default_image"
                 android:scaleType="centerCrop"
                 android:layout_alignTop="@id/restaurant_image_view"
                 android:layout_alignBottom="@id/restaurant_image_view"
