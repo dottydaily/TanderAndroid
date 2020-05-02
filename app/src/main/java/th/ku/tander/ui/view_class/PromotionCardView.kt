@@ -110,7 +110,6 @@ class PromotionCardView : CardView {
         linearLayout.addView(expandDivider)
         linearLayout.addView(expandButton)
 
-
         return linearLayout
     }
 
@@ -124,7 +123,7 @@ class PromotionCardView : CardView {
             )
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         } else {
-            imageView.setImageResource(R.drawable.default_image)
+            imageView.setImageResource(R.drawable.no_image)
             imageView.imageAlpha = 200
             imageView.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT

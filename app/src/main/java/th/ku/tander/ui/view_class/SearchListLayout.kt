@@ -2,7 +2,10 @@ package th.ku.tander.ui.view_class
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -41,6 +44,12 @@ class SearchListLayout: FrameLayout {
         restaurantAddressTextView.postDelayed({
             restaurantAddressTextView.isSelected = true
         }, 3000)
+
+        this.setOnClickListener {
+            val intent = Intent(this.context, RestaurantActivity::class.java)
+            intent.putExtra("restaurantJson", restaurant.toJson().toString())
+            this.context.startActivity(intent)
+        }
 
         button.setOnClickListener {
             val intent = Intent(this.context, RestaurantActivity::class.java)

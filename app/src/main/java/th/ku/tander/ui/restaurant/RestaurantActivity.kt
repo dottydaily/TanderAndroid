@@ -1,6 +1,7 @@
 package th.ku.tander.ui.restaurant
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -48,11 +49,14 @@ class RestaurantActivity : AppCompatActivity() {
         handleCreateButton()
 
         restaurantViewModel.restaurant.observe(this, Observer {
-            if (it != null) restaurantViewModel.fetchRestaurantImage()
+            if (it != null) {
+                updateUiData()
+                restaurantViewModel.fetchRestaurantImage()
+            }
         })
 
         restaurantViewModel.isDoneLoaded.observe(this, Observer { isDone ->
-            if (isDone) updateUiData()
+            if (isDone) updateUiImage()
         })
     }
 
@@ -106,8 +110,16 @@ class RestaurantActivity : AppCompatActivity() {
             restaurant_loading_spinner.visibility = View.INVISIBLE
             restaurant_content_view.visibility = View.VISIBLE
         }
+    }
 
-        restaurantViewModel.image.value.let { restaurant_image_view.setImageBitmap(it) }
+    private fun updateUiImage() {
+        restaurantViewModel.image.value.let {
+            if (it != null) {
+                restaurant_image_view.setImageBitmap(it)
+            } else {
+                restaurant_image_view.setImageResource(R.drawable.no_image)
+            }
+        }
     }
 
     private fun handleCreateButton() {

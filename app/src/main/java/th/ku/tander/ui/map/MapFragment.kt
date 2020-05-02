@@ -22,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.json.JSONArray
@@ -29,7 +30,11 @@ import org.json.JSONObject
 import th.ku.tander.R
 import th.ku.tander.helper.LocationRequester
 import th.ku.tander.helper.RequestManager
+import th.ku.tander.model.Restaurant
+import th.ku.tander.model.RestaurantInfoData
+import th.ku.tander.ui.restaurant.RestaurantActivity
 import th.ku.tander.ui.search.SearchActivity
+import th.ku.tander.ui.view_class.RestaurantCardInfoGoogleMap
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -49,8 +54,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // implement google map fragment
         mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
-
-        mapFragment.retainInstance = true
+        mapFragment.retainInstance
         mapFragment.getMapAsync(this)
 
         if (savedInstanceState != null) {
@@ -77,12 +81,36 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             revealFragment(mapFragment, false)
         }
 
+        // observe location, then do fetch restaurant
+        mapViewModel.currentLocation.observe(viewLifecycleOwner, Observer {
+            if (it != null) mapViewModel.fetchRestaurants()
+        })
+
+        // observe if done loading, then set data on map
+        mapViewModel.getRestaurantMap().observe(viewLifecycleOwner, Observer {
+            if (it != null) setDataOnMap(it)
+        })
+
         return view
     }
 
+    // Google Map : Run when complete created map fragment completed
     override fun onMapReady(googleMap: GoogleMap) {
         println("========== MAP READY: MAP FRAGMENT ==========")
         mMap = googleMap
+        mMap!!.setInfoWindowAdapter(RestaurantCardInfoGoogleMap(this.requireContext()))
+
+        mMap?.setOnInfoWindowClickListener {
+            Toast.makeText(this.requireContext(), "Long pressed for more details", Toast.LENGTH_SHORT).show()
+        }
+
+        mMap?.setOnInfoWindowLongClickListener {
+            val restaurant = it.tag as RestaurantInfoData
+            val intent = Intent(this.requireContext(), RestaurantActivity::class.java)
+            intent.putExtra("restaurantJson",
+                mapViewModel.getRestaurantById(restaurant.restaurantId).toString())
+            this.requireContext().startActivity(intent)
+        }
     }
 
     override fun onStart() {
@@ -93,16 +121,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-
-        // check location, then do fetch restaurant
-        mapViewModel.currentLocation.observe(viewLifecycleOwner, Observer {
-            if (it != null) mapViewModel.fetchRestaurants()
-        })
-
-        // check if done loading, then set data on map
-        mapViewModel.getRestaurantMap().observe(viewLifecycleOwner, Observer {
-            if (it != null) setDataOnMap(it)
-        })
 
         println("========== RESUME: MAP FRAGMENT ==========")
         handleSearchBarBehavior()
@@ -128,7 +146,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             putDouble("lon", mapViewModel.currentLocation.value!!.longitude)
             putString("restaurants", mapViewModel.restaurantJsonString)
         }
-        mapFragment.onSaveInstanceState(outState)
+
+        childFragmentManager.putFragment(outState, "mapFragment", mapFragment)
+//        mapFragment.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
     }
 
@@ -144,15 +164,31 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         search_bar.visibility = View.VISIBLE
 
         restaurantMap.map {
-            val restaurant = it.value
+            val json = it.value
+            val position = json.getJSONObject("position")
+            val categories = json.getJSONArray("categories")
+            val categoryList = arrayListOf<String>()
+            for (i in 0 until categories.length()) {
+                categoryList.add(categories.getString(i))
+            }
+            val restaurantInfo = RestaurantInfoData(
+                restaurantId = json.getString("_id"),
+                name = json.getString("name"),
+                categories = categoryList,
+                startPrice = json.getDouble("startPrice"),
+                lat = position.getDouble("lat"),
+                lon = position.getDouble("lon")
+            )
+            val markerOptions = MarkerOptions()
 
-            val position = restaurant.getJSONObject("position")
-            val lat = position.getDouble("lat")
-            val lon = position.getDouble("lon")
-            val title = restaurant.getString("name")
+            restaurantInfo.apply {
+                markerOptions.position(LatLng(lat, lon))
+            }
 
             // Add a marker of each restaurant
-            mMap?.addMarker(MarkerOptions().position(LatLng(lat, lon)).title(title))
+            val m = mMap?.addMarker(markerOptions)
+            m?.tag = restaurantInfo
+            m?.showInfoWindow()
         }
 
         mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(mapViewModel.currentLocation.value, 16.0f))

@@ -141,10 +141,8 @@ class SearchActivity : AppCompatActivity() {
             val address = restaurant.getString("address")
 
             // create restaurant's row & divider
-            val restaurantListView = SearchListLayout(
-                this,
-                restaurant.toString()
-            )
+            val restaurantListView = SearchListLayout(this, restaurant.toString())
+
 //            val restaurantRow = createRestaurantRow(title, address)
             val divider = createDivider()
 
